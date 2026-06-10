@@ -112,6 +112,53 @@ Conventional Commits 简版:
 | 日志报 `main is not defined` | 客户端没启用 JS 预处理 | Profile 设置里勾上 Script |
 | Clash Verge 加载报语法错 | 文件被存为 CRLF | 仓库已强制 LF,确认你的编辑器存为 LF |
 
+## 第三方 Provider 致谢
+
+脚本**引用但未打包**以下第三方资源——规则集、DNS 服务器、图标资源、连通性探测端点。
+所有都是公开、开源、长期维护的项目,致谢它们的作者。
+
+### 规则集(rule-providers,通过 jsdelivr CDN 拉取)
+
+| 仓库 | URL | 用途 | 范围 |
+|------|-----|------|------|
+| [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script) | `cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash` | 通用规则基础(Clash 版) | 桌面 + 移动 |
+| [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules) | `.../clash-rules@release/proxy.txt` | 代理列表 | 桌面 + 移动 |
+| Loyalsoldier/clash-rules | `.../clash-rules@release/direct.txt` | 直连域名 | 桌面 + 移动 |
+| Loyalsoldier/clash-rules | `.../clash-rules@release/private.txt` | 私有 IP / 内网段 | 桌面 + 移动 |
+| Loyalsoldier/clash-rules | `.../clash-rules@release/applications.txt` | 进程名匹配 | **仅桌面**(移动端不可靠) |
+
+> jsdelivr 国内访问经常被干扰。如需自部署镜像,把 `cdn.jsdelivr.net` / `fastly.jsdelivr.net` 换成其他 CDN 即可。
+
+### DNS(DoH 服务器)
+
+**国内(解析 CN 域名、Steam CDN):**
+- [阿里云 DNS](https://www.alidns.com/) — `https://dns.alidns.com/dns-query`
+- [腾讯 DNSPod](https://www.dnspod.cn/) — `https://doh.pub/dns-query`
+- [360 安全 DNS](https://sdns.360.net/) — `https://doh.360.cn/dns-query`
+
+**境外(解析非 CN 域名):**
+- [Cloudflare](https://developers.cloudflare.com/1.1.1.1/) — `https://1.1.1.1/dns-query` / `https://1.0.0.1/dns-query`
+- [OpenDNS](https://www.opendns.com/) (Cisco) — `https://208.67.222.222/dns-query` / `https://208.67.220.220/dns-query`
+- [Mullvad DNS](https://mullvad.net/en/help/dns-over-https-and-dns-over-tls) — `https://194.242.2.2/dns-query` / `https://194.242.2.3/dns-query`
+
+### 图标资源
+
+- [clash-verge-rev/clash-verge-rev.github.io](https://github.com/clash-verge-rev/clash-verge-rev.github.io) — 代理组 icon + 国家/地区 flag(经 jsdelivr CDN)
+- 仅桌面版使用(`icon` 属性在移动客户端不渲染,见「桌面 ↔ 移动差异」)
+
+### 连通性探测与健康检查
+
+脚本里用到的健康检查 / captive-portal 探测端点(都是公开服务):
+
+- `https://www.gstatic.com/generate_204` / `https://www.google.com/generate_204` — Google
+- `https://www.apple.com/library/test/success.html` — Apple
+- `http://www.msftconnecttest.com/connecttest.txt` — Microsoft(移动端 captive-portal 列表)
+- `https://store.steampowered.com/about/` — Steam(桌面组默认 URL 测试)
+- `https://chatgpt.com` — ChatGPT(对应代理组默认 URL)
+- `+.connectivitycheck.gstatic.com` / `+.msftconnecttest.com` — 移动端 captive-portal 域名(走直连)
+
+---
+
 ## 协议
 
 [MIT](./LICENSE)
