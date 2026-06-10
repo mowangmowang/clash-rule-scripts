@@ -41,6 +41,73 @@ Clash 客户端在加载订阅源后,会调用 `main(config)` 传入配置对象
 脚本**就地修改**这个对象(覆盖 DNS、规则、代理组),然后返回。
 订阅源更新时自定义规则**不会丢失**——因为它们是脚本注入,不是写进 YAML。
 
+## 流量处理流程
+
+下面以一个真实请求(应用要下载 Steam 内容 `steampipe.akamaized.net`)为线索,展示从 DNS 查询到上游代理的完整链路。**三个阶段串成一条线**:
+
+```mermaid
+flowchart TD
+    Start([App 发起连接<br/>域名: steampipe.akamaized.net])
+
+    subgraph STAGE1["① DNS 解析(fake-ip 模式)"]
+        Start --> Q1[Clash 拦截 DNS 查询]
+        Q1 --> Q2{fake-ip-filter<br/>匹配?}
+        Q2 -->|是<br/>局域网 / Captive / QQ 登录| Q3[返回真实 IP]
+        Q2 -->|否| Q4{nameserver-policy<br/>首匹配胜}
+        Q4 -->|Steam CDN / .cn| Q5[国内 DoH<br/>Alidns / DNSPod / 360]
+        Q4 -->|Google / YouTube / GFW| Q6[境外 DoH<br/>Cloudflare / OpenDNS / Mullvad]
+        Q4 -->|其他| Q7[fallback 二次验证]
+        Q5 --> Q8[返回 fake-IP<br/>198.18.x.x]
+        Q6 --> Q8
+        Q7 --> Q8
+    end
+
+    subgraph STAGE2["② 规则匹配(自上而下首匹配胜)"]
+        Q3 --> R0[Clash 截获连接<br/>查表找回域名]
+        Q8 --> R0
+        R0 --> R1[Steam CDN 硬编码<br/>→ DIRECT]
+        R1 --> R2[QUIC 阻断<br/>→ REJECT]
+        R2 --> R3[Rule-SET 广告 / 隐私<br/>→ Ad Block / Global Block]
+        R3 --> R4[功能组精确命中<br/>→ Apple / Google / AI / Steam]
+        R4 --> R5[applications<br/>→ DIRECT]
+        R5 --> R6[geosite cn / private<br/>→ DIRECT]
+        R6 --> R7[geosite !cn / gfw<br/>→ Select Node]
+        R7 --> R8[MATCH 兜底<br/>→ Select Node]
+    end
+
+    R8 --> ACT{③ 动作分叉}
+    ACT -->|DIRECT| END1([本地网卡<br/>直连 CN Akamai])
+    ACT -->|REJECT| END2([丢包])
+    ACT -->|Proxy Group| GRP
+
+    subgraph STAGE3["③ 代理组调度"]
+        GRP[Select Node<br/>顶层入口] --> G2[Latency Test<br/>url-test]
+        GRP --> G3[Failover<br/>fallback]
+        GRP --> G4[Load Balance<br/>hash / RR]
+        GRP --> G5[功能组<br/>Apple / Google / AI / Steam]
+        G2 --> POOL[节点池<br/>US / JP / EU / ...]
+        G3 --> POOL
+        G4 --> POOL
+        G5 --> POOL
+    end
+
+    POOL --> END3([上行转发到<br/>upstream proxy])
+```
+
+### 关键节点速记(配合上图)
+
+- **`fake-ip-filter` 命中** → 走真实 IP(局域网、QQ/微信 快速登录、Windows Captive 等)
+- **`nameserver-policy` 命中 Steam CDN** → 国内 DoH 解析 → 拿到国内 Akamai CDN IP → fake-IP 198.18.x.x
+- **规则链前 3 条都是 `DIRECT`**(Steam CDN、QUIC 阻断后的 Google 流量、applications)——这些流量完全不出本机网卡
+- **规则链最末 2 条**是 `Select Node`(geosite !cn / gfw + MATCH 兜底),承担「被 GFW 屏蔽的境外服务」代理
+- **代理组最终汇聚到「节点池」**(US / JP / EU / HK / SG / ...),按 url-test / fallback / load-balance 策略选出 1 个节点
+
+### 与「Steam 三大原则」的对应
+
+- 原则 1(规则顺序):图 ② 中 R1 在 R2/R3 之前,Steam CDN 不被广告规则集 REJECT
+- 原则 2(fake-ip-filter 边界):图 ① 中 Steam CDN 域名**不在** `fake-ip-filter` 内,继续走 fake-IP 路径
+- 原则 3(nameserver-policy 顺序):图 ① 中 Steam CDN 条目在 `geosite:geolocation-!cn` 之前,命中 Q5 国内 DoH
+
 ## 可定制点(最常改的)
 
 打开任一 JS 文件,顶部一节是「常量定义」,改完保存即可生效:
