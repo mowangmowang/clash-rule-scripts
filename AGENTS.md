@@ -103,4 +103,9 @@ git push origin main --tags
 - 提交信息:Conventional Commits 简版(`feat` / `fix` / `refactor` / `perf` / `docs` / `chore`)
 - 分支:`main` only;3 个文件不需要 dev / feature 分支
 - 远程:本仓库**当前没有 remote**。如需推送到 GitHub / Gitee,再 `git remote add origin <url>`
-- 换行符:仓库内统一 LF。Windows 上需 `git config --global core.autocrlf input`(已配)
+- 换行符:仓库内统一 LF。链式配置(从内到外):
+  1. `.gitattributes` 写 `*.js text eol=lf` — 仓库内对所有 .js 强制 LF
+  2. `git config --local core.autocrlf false` — 仓库内禁用 git 自身的 CRLF↔LF 转换,让 `.gitattributes` 单独说了算
+  3. `git config --global core.autocrlf input` — 全局默认,适合新仓库
+  - 之所以要在 `local` 设 `false`:Windows Git for Windows 在系统级 (`E:\Git\etc\gitconfig`) 把 `autocrlf` 强制设为 `true`,会覆盖 global 的 `input`,把已 LF 的文件存成 CRLF。仓库级 `false` 是显式兜底
+  - 如果换机器或重装 Git,请先确认 `git config --show-origin --get core.autocrlf` 看到的是 `input` 或 `false`,不是 `true`
