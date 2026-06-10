@@ -1,0 +1,17 @@
+# Force LF line endings for all source files on all platforms.
+# Combined with `core.autocrlf=input` on Windows, this guarantees the
+# repository stores a single canonical newline (LF) regardless of the
+# editor's platform default.
+*.js   text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+
+# Binary assets (none expected today, listed defensively)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico  binary
+*.pdf  binary

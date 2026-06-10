@@ -1,0 +1,56 @@
+# ─────────────────────────────────────────────────────────────
+#  OS junk
+# ─────────────────────────────────────────────────────────────
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+desktop.ini
+$RECYCLE.BIN/
+
+# ─────────────────────────────────────────────────────────────
+#  Editor / IDE scratch
+# ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# ─────────────────────────────────────────────────────────────
+#  Node (defensive — no Node deps today, but the JS ecosystem
+#  tends to leak these into repos if tooling is ever added)
+# ─────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─────────────────────────────────────────────────────────────
+#  Logs
+# ─────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─────────────────────────────────────────────────────────────
+#  Secrets / environment (defense in depth — the scripts
+#  themselves should never contain subscription URLs or tokens)
+# ─────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
