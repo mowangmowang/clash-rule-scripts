@@ -358,6 +358,12 @@ const rules = [
     "AND,((DOMAIN-SUFFIX,gstatic.com),(NETWORK,UDP)),REJECT",
     "AND,((DOMAIN-SUFFIX,googleapis.com),(NETWORK,UDP)),REJECT",
     "AND,((DOMAIN-SUFFIX,youtube.com),(NETWORK,UDP)),REJECT",
+    // [2026-06-09 fix, synced 2026-06-10] Force Apple HLS over TCP:
+    // Chrome may attempt QUIC/UDP for aod-ssl/mvod/audio-ssl/music.apple.com;
+    // proxy tunnels (VMess/Trojan) handle UDP poorly and drop streams,
+    // surfacing as ERR_CONNECTION_CLOSED for every chunk.
+    "AND,((DOMAIN-SUFFIX,itunes.apple.com),(NETWORK,UDP)),REJECT",
+    "AND,((DOMAIN-SUFFIX,apple.com),(NETWORK,UDP)),REJECT",
 
     /**
      * ═══════════════════════════════════════════════════════
