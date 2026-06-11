@@ -2,7 +2,7 @@
  * Clash Meta Mobile - Configuration Script (main.js)
  *
  * @version     1.0
- * @date        2026-06-08
+ * @date        2026-06-10
  * @target      Clash Meta for Android (2.11+), Stash (iOS)
  * @description Injects DNS, routing rules, proxy groups and regional
  *              auto-grouping into the upstream subscription config.
@@ -19,8 +19,8 @@
  * - All Steam CDN / download rules removed  (desktop-only).
  * - applications rule-provider removed       (process-name matching
  *   is unreliable on Android due to selinux isolation).
- * - All `icon` properties removed            (desktop GUI extension;
- *   mobile clients either ignore them or don't render them).
+ * - `icon` properties retained               (verified rendering on
+ *   Clash Meta for Android 2.11+ and Stash iOS).
  * - IPv6 disabled by default                 (cellular carrier IPv6
  *   routing is frequently broken).
  * - Health-check intervals lengthened        (reduce battery drain

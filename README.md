@@ -115,7 +115,7 @@ flowchart TD
 | 变量 | 控制什么 | 常见改动 |
 |------|---------|---------|
 | `domesticNameservers` | 国内 DNS(解析 CN 域名) | 换更快的 DoH,如 `https://1.12.12.12/dns-query` |
-| `overseasNameservers` | 境外 DNS | 换 Cloudflare / Google |
+| `foreignNameservers` | 境外 DNS | 换 Cloudflare / Google |
 | `steamCDN` 列表 | Steam CDN 域名(直连解析) | 加新发现的 CDN |
 | `proxyGroups` | 代理组定义 | 改名 / 改选择策略 |
 | `healthCheck.interval` | 节点健康检查间隔 | 移动端调长省电 |

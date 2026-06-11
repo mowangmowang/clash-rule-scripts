@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Mobile release line
 
-### [mobile-v1.0] - 2026-06-08
+### [mobile-v1.0] - 2026-06-10
 
 #### Added
 - Initial release, derived from the desktop `v1.1` scripts.
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Desktop release line
 
-### [desktop-v1.1] - 2026-06-08
+### [desktop-v1.1] - 2026-06-10
 
 #### Changed
 - `nameserver-policy`: Steam CDN entries now precede `geosite:geolocation-!cn`,
@@ -41,6 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Steam downloads previously returned 0 bps under fake-ip mode due to
   the nameserver ordering bug above.
 
-[Unreleased]: https://example.invalid/compare/desktop-v1.1...HEAD
-[mobile-v1.0]: https://example.invalid/releases/tag/mobile-v1.0
-[desktop-v1.1]: https://example.invalid/releases/tag/desktop-v1.1
+[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.1...HEAD
+[mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[desktop-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.1

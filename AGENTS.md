@@ -102,7 +102,7 @@ git push origin main --tags
 
 - 提交信息:Conventional Commits 简版(`feat` / `fix` / `refactor` / `perf` / `docs` / `chore`)
 - 分支:`main` only;3 个文件不需要 dev / feature 分支
-- 远程:本仓库**当前没有 remote**。如需推送到 GitHub / Gitee,再 `git remote add origin <url>`
+- 远程:本仓库 origin = `https://github.com/mowangmowang/clash-rule-scripts.git`,**已配置**。直接 `git push origin main --tags` 即可推送
 - 换行符:仓库内统一 LF。链式配置(从内到外):
   1. `.gitattributes` 写 `*.js text eol=lf` — 仓库内对所有 .js 强制 LF
   2. `git config --local core.autocrlf false` — 仓库内禁用 git 自身的 CRLF↔LF 转换,让 `.gitattributes` 单独说了算

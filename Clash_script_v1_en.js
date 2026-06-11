@@ -2,7 +2,7 @@
  * Clash Verge Rev — Main Configuration Script (main.js)
  *
  * @version  1.1
- * @date     2026-06-08
+ * @date     2026-06-10
  *
  * How it works
  * ────────────
