@@ -856,7 +856,7 @@ function main(config) {
             ...GROUP_TIERS.COLD,
             "name": "Microsoft Services",
             "type": "select",
-            "proxies": ["DIRECT", ...standardProxies],
+            "proxies": ["DIRECT", ...standardProxies.filter(p => p !== "DIRECT")],
             "include-all": true,
             "url": "http://www.msftconnecttest.com/connecttest.txt",
             "expected-status": "200",
