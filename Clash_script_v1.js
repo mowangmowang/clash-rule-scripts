@@ -103,6 +103,19 @@ const dnsConfig = {
         "+.msftconnecttest.com",
         "+.msftncsi.com",
 
+        // ── Microsoft Store / UWP 应用（修复 0x800704cf 联网错误）────────
+        // 【2026-06-12 根因修复】Microsoft Store UWP 进程（WinStore.App.exe 等）
+        // 在 fake-ip 模式下会获取 198.18.x.x 假 IP，部分内部 WinHTTP 连通性
+        // 探测把假 IP 段判为"unreachable"并直接中止，导致 Store 报 0x800704cf
+        // (Win32 ERROR_NETWORK_UNREACHABLE)。把这些域名改为返回真实 IP 后，
+        // sniffer 通过 TLS Client Hello 还原 SNI，DOMAIN 规则照常匹配，DIRECT
+        // 直连真实 CDN。代价：DNS 一次真实解析（Clash 缓存，损耗可忽略）。
+        "+.microsoft.com",
+        "+.live.com",
+        "+.mp.microsoft.com",
+        "+.microsoftstore.com",
+        "+.onestore.ms",
+
         // QQ 快速登录检测（fake-ip 会导致本地登录失败）
         "localhost.ptlogin2.qq.com",
         "localhost.sec.qq.com",

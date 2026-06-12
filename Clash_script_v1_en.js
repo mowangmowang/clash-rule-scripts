@@ -128,6 +128,23 @@ const dnsConfig = {
         "+.msftconnecttest.com",
         "+.msftncsi.com",
 
+        // ── Microsoft Store / UWP apps (fixes 0x800704cf "no internet") ──
+        // [2026-06-12 root-cause fix] Microsoft Store UWP processes
+        // (WinStore.App.exe, etc.) under fake-ip receive 198.18.x.x
+        // synthetic IPs.  Some internal WinHTTP connectivity probes
+        // flag this range as "unreachable" and abort, surfacing in
+        // the Store as 0x800704cf (Win32 ERROR_NETWORK_UNREACHABLE).
+        // Returning real IPs for these domains lets the connection
+        // reach the actual Microsoft CDN; sniffer still recovers the
+        // SNI from the TLS Client Hello so DOMAIN rules match and
+        // route DIRECT as before.  Cost: one real DNS lookup per
+        // domain (cached by Clash; negligible overhead).
+        "+.microsoft.com",
+        "+.live.com",
+        "+.mp.microsoft.com",
+        "+.microsoftstore.com",
+        "+.onestore.ms",
+
         // QQ quick-login detection (fake-ip breaks local login)
         "localhost.ptlogin2.qq.com",
         "localhost.sec.qq.com",

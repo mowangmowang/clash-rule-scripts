@@ -113,6 +113,18 @@ const dnsConfig = {
         // iOS: captive portal detection — fake-IP makes iOS think there's
         // no internet and show the "Login" WiFi popup
         "+.captive.apple.com",
+
+        // ── Microsoft services (Outlook mobile / OneDrive / Authenticator) ──
+        // [2026-06-12] Same fake-IP UWP-style probe issue observed on some
+        // Microsoft mobile clients — the app's internal network probe flags
+        // 198.18.x.x as "unreachable" and reports "no internet".  Returning
+        // real IPs (cached by Clash) lets the connections reach the actual
+        // Microsoft CDN.  Routing rules still match via sniffer SNI recovery.
+        "+.microsoft.com",
+        "+.live.com",
+        "+.mp.microsoft.com",
+        "+.microsoftonline.com",
+        "+.office.com",
     ],
 
     /**
