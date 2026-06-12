@@ -542,13 +542,34 @@ const rules = [
       *  4-4  Custom Override Rules  (correct rule-set false positives)
      * ═══════════════════════════════════════════════════════════
      */
+    // ── Microsoft Store backend & runtime APIs → DIRECT (bypass Microsoft Services group) ──
+    // Root cause of "Store failed to initialize": these API domains were caught by
+    // RULE-SET,microsoft → Microsoft Services group. WebSocket/SSE real-time connections
+    // can be broken by proxy group processing. Matching DIRECT here bypasses the group.
+    "DOMAIN-KEYWORD,microsoftstore,DIRECT",
+    "DOMAIN-KEYWORD,onestore,DIRECT",
+    "DOMAIN-SUFFIX,apps.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,assets.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,onestore.ms,DIRECT",
+    "DOMAIN-SUFFIX,microsoftstore.com,DIRECT",
+    "DOMAIN-SUFFIX,events.data.microsoft.com,DIRECT",
+    "DOMAIN-KEYWORD,watson.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,pipe.aria.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,msn.com,DIRECT",
+    "DOMAIN-SUFFIX,storecatalogrevocation.storequality.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,windowssearch.com,DIRECT",
+    // ── Microsoft Store UWP processes (TUN-mode process-level safety net) ───────
+    // Any traffic from these 3 Store executables is forced DIRECT regardless of
+    // domain. Future-proof against Store adding new endpoints.
+    // Requires TUN mode + find-process-mode: strict (default in Clash Meta/Mihomo).
+    "PROCESS-NAME,WinStore.App.exe,DIRECT",
+    "PROCESS-NAME,Microsoft.StorePurchaseApp.exe,DIRECT",
+    "PROCESS-NAME,Microsoft.WindowsStore*,DIRECT",
     // ── Microsoft Store / winget CDNs → DIRECT ──────────────────────────
-    // IMPORTANT: Microsoft Store is a UWP app. Windows blocks UWP apps from
-    // accessing 127.0.0.1 by default. DIRECT rules alone won't fix it unless:
-    //   a) Enable TUN mode in Clash Verge Rev (Settings → TUN Mode → ON)
-    //   b) Run as Admin in PowerShell:
+    // REQUIREMENTS for Microsoft Store to work:
+    // 1) Enable TUN mode in Clash Verge Rev (Settings → TUN Mode → ON)
+    // 2) If still broken, run as Admin in PowerShell:
     //      CheckNetIsolation.exe LoopbackExempt -a -n=Microsoft.WindowsStore_8wekyb3d8bbwe
-    // Below DIRECT rules take effect once TUN mode is active.
     "DOMAIN-SUFFIX,mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,delivery.mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,winget.microsoft.com,DIRECT",
@@ -723,9 +744,11 @@ function main(config) {
      * inspects TLS SNI / HTTP Host headers to recover the true
      * domain name.
      *
-     * msftconnecttest.com / microsoft.com are kept in skip-domain to
-     * prevent Windows connectivity checks and system traffic from breaking
-     * due to fake-ip.
+     * msftconnecttest.com is kept in skip-domain to prevent Windows NCSI
+     * from breaking due to fake-ip.  microsoft.com has been removed because
+     * Microsoft Store uses an embedded WebView — skipping it prevents the
+     * sniffer from recovering the true SNI, breaking DOMAIN rule matching.
+     * msftncsi.com is still in fake-ip-filter as a fallback for NCSI.
      */
     config["sniffer"] = {
         "enable":       true,
@@ -733,7 +756,6 @@ function main(config) {
         "skip-domain":  [
             "+.mijia.cloud",
             "+.apple.com",
-            "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
     };

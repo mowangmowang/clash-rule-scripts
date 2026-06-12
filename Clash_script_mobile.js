@@ -393,6 +393,16 @@ const rules = [
      * §4-3.  Custom Override Rules  (correct rule-set false positives)
      * ═══════════════════════════════════════════════════════
      */
+    // ── Microsoft Store 后端 & 运行时 API → DIRECT（绕过 Microsoft Services 代理组）─
+    // Store 的内容初始化 API 被 RULE-SET,microsoft 捕获后走代理组可能出问题。
+    // 移动端没有 Microsoft Store 应用，但用户可能用浏览器访问 Store Web 端。
+    "DOMAIN-KEYWORD,microsoftstore,DIRECT",
+    "DOMAIN-KEYWORD,onestore,DIRECT",
+    "DOMAIN-SUFFIX,apps.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,assets.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,onestore.ms,DIRECT",
+    "DOMAIN-SUFFIX,microsoftstore.com,DIRECT",
+    "DOMAIN-SUFFIX,msn.com,DIRECT",
     // ── Copilot → AI Overseas（后端 API 被墙，强制代理）─────────────────
     "DOMAIN-SUFFIX,copilot.microsoft.com,AI Overseas",
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",

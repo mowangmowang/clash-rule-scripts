@@ -480,13 +480,33 @@ const rules = [
      * § 4-4. 自定义修正规则（处理规则集的误判）
      * ══════════════════════════════════════════════════════
      */
+    // ── Microsoft Store 后端 & 运行时 API → DIRECT（绕过 Microsoft Services 代理组）─
+    // 【关键】Store "failed to initialize" 报错的根因：这些 API 域名被 RULE-SET,microsoft 捕获
+    // 走 Microsoft Services 代理组处理。WebSocket/SSE 实时连接经代理组可能中断。
+    // 这里在 RULE-SET 之前精确匹配，让 Store 流量完全绕过代理组直连。
+    "DOMAIN-KEYWORD,microsoftstore,DIRECT",
+    "DOMAIN-KEYWORD,onestore,DIRECT",
+    "DOMAIN-SUFFIX,apps.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,assets.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,onestore.ms,DIRECT",
+    "DOMAIN-SUFFIX,microsoftstore.com,DIRECT",
+    "DOMAIN-SUFFIX,events.data.microsoft.com,DIRECT",
+    "DOMAIN-KEYWORD,watson.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,pipe.aria.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,msn.com,DIRECT",
+    "DOMAIN-SUFFIX,storecatalogrevocation.storequality.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,windowssearch.com,DIRECT",
+    // ── Microsoft Store UWP 进程（TUN 模式下进程级兜底）───────────────────
+    // 即使未来 Store 改用新域名，只要是这 3 个进程产生的流量都 DIRECT。
+    // 需 TUN 模式 + find-process-mode: strict（Clash Meta/Mihomo 默认 strict）。
+    "PROCESS-NAME,WinStore.App.exe,DIRECT",
+    "PROCESS-NAME,Microsoft.StorePurchaseApp.exe,DIRECT",
+    "PROCESS-NAME,Microsoft.WindowsStore*,DIRECT",
     // ── Microsoft Store / winget CDN → DIRECT ─────────────────────────────
-    // 【重要】Microsoft Store 是 UWP 应用，Windows 默认禁止 UWP 访问 127.0.0.1。
-    // 仅靠 DIRECT 规则无法解决 Store 无法联网的问题，需配合以下任一措施：
-    //   a) 开启 Clash Verge Rev 的 TUN 模式（设置 → TUN 模式 → 开启）
-    //   b) PowerShell 管理员运行：
-    //      CheckNetIsolation.exe LoopbackExempt -a -n=Microsoft.WindowsStore_8wekyb3d8bbwe
-    // TUN 模式开启后，以下 DIRECT 规则才会对 Store 生效。
+    // 【必读】TUN 模式 + UWP 流程：
+    // 1) 开启 Clash Verge Rev 的 TUN 模式（设置 → TUN 模式 → 开启）
+    // 2) PowerShell 管理员执行 UWP 回环豁免（如仍无效）：
+    //    CheckNetIsolation.exe LoopbackExempt -a -n=Microsoft.WindowsStore_8wekyb3d8bbwe
     "DOMAIN-SUFFIX,mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,delivery.mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,winget.microsoft.com,DIRECT",
@@ -640,15 +660,15 @@ function main(config) {
 
     // 【新增】开启 sniffer 域名嗅探
     // 解决浏览器开启安全 DNS (DoH) 时，Clash 只能获取到目标 IP 而无法匹配 DOMAIN 规则的问题
-    // 【注意】skip-domain 中保留 microsoft.com / msftconnecttest.com 是为了防止
-    // Windows 连通性检测等系统流量因 fake-ip 而异常。
+    // 【注意】保留 msftconnecttest.com 是为了防止 Windows NCSI 因 fake-ip 异常。
+    // microsoft.com 已移除：Store 用 WebView 渲染，skip 会阻止 sniffer 识别真实 SNI 域名，
+    // 导致 DOMAIN 规则无法正确匹配。msftncsi.com 仍在 fake-ip-filter 中保护 NCSI。
     config["sniffer"] = {
         "enable": true,
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",
             "+.apple.com",
-            "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
     };
