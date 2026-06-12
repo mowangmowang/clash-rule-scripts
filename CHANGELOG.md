@@ -10,6 +10,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Mobile release line
 
+### [mobile-v1.2] - 2026-06-12
+
+#### Added
+- Microsoft services support (partial): Microsoft rule-set enabled,
+  Microsoft Services proxy group, Bing follows the group (default
+  DIRECT, switchable to proxy), Copilot pinned to AI Overseas.
+- `name-server-policy`: `+.microsoft.com`, `+.office.com`,
+  `+.office365.com`, `+.live.com`, `+.outlook.com` resolve via
+  domestic DNS for mainland China CDN IPs.
+- `fake-ip-filter`: `+.microsoft.com`, `+.live.com`,
+  `+.mp.microsoft.com`, `+.microsoftonline.com`, `+.office.com` —
+  bypasses fake-ip so Outlook mobile / OneDrive mobile / Microsoft
+  Authenticator receive real IPs and don't trip the UWP-style
+  "unreachable" probe that some Microsoft clients perform.
+
+#### Fixed
+- `Microsoft Services` proxy group had a duplicate `DIRECT` entry
+  (one from the `standardProxies` array, one from the explicit
+  prepended `["DIRECT", ...]`). Now filtered.
+
+### [mobile-v1.1] - 2026-06-10
+
+#### Fixed
+- Apple HLS forced onto TCP: Chrome's QUIC attempts to `*.apple.com` and
+  `itunes.apple.com` previously failed under proxy tunnels (VMess/Trojan
+  UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
+  blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`
+  rules, mirroring the desktop v1.1 fix. Stash (iOS) supports AND +
+  NETWORK since v3.0.2 (April 2025), so this is safe on both targets.
+
 ### [mobile-v1.0] - 2026-06-10
 
 #### Added
@@ -24,21 +54,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Steam CDN / download direct-connect rules.
 - `applications` rule provider (process-name matching is unreliable on Android).
 
-### [mobile-v1.1] - 2026-06-10
-
-#### Fixed
-- Apple HLS forced onto TCP: Chrome's QUIC attempts to `*.apple.com` and
-  `itunes.apple.com` previously failed under proxy tunnels (VMess/Trojan
-  UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
-  blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`
-  rules, mirroring the desktop v1.1 fix. Stash (iOS) supports AND +
-  NETWORK since v3.0.2 (April 2025), so this is safe on both targets.
-
 > Note: at the time of `mobile-v1.0`, the Apple HLS fix had only been
 > applied to the desktop release line. The 2026-06-10 sync brings mobile
 > into parity.
 
 ## Desktop release line
+
+### [desktop-v1.2] - 2026-06-12
+
+#### Added
+- Microsoft services support: BM7 `Microsoft` rule-set enabled,
+  `Microsoft Services` proxy group (default DIRECT, switchable to
+  proxy for users who want all Microsoft traffic via proxy), Bing
+  follows the group, Copilot pinned to `AI Overseas`.
+- Store / winget CDN rules (hardcoded `DOMAIN-SUFFIX` / `DOMAIN-KEYWORD`
+  / `PROCESS-NAME` at the top of the rule list, before `RULE-SET`):
+  `microsoftstore`, `onestore`, `apps.microsoft.com`,
+  `assets.microsoft.com`, `onestore.ms`, `microsoftstore.com`,
+  `events.data.microsoft.com`, `watson.microsoft.com`,
+  `pipe.aria.microsoft.com`, `msn.com`,
+  `storecatalogrevocation.storequality.microsoft.com`,
+  `windowssearch.com`, `mp.microsoft.com`, `delivery.mp.microsoft.com`,
+  `winget.microsoft.com`, plus `WinStore.App.exe`,
+  `Microsoft.StorePurchaseApp.exe`, `Microsoft.WindowsStore*`
+  process-name fallbacks.
+- Login / auth rules: `login.live.com`, `login.windows.net`,
+  `account.live.com`.
+- Windows Update rules: `download.windowsupdate.com`,
+  `download.microsoft.com`, `officecdn.microsoft.com`, `wns.windows.com`.
+- `nameserver-policy` entries for Microsoft CDN domains so they
+  resolve via domestic DNS (mainland China CDN IPs):
+  `+.microsoft.com`, `+.microsoftonline.com`, `+.msauth.net`,
+  `+.azure.com`, `+.office.com`, `+.office365.com`, `+.live.com`,
+  `+.outlook.com`, `+.windowsupdate.com`, `+.mp.microsoft.com`.
+- `profile.store-selected: true` and `profile.store-fake-ip: true`
+  for persistence across restarts.
+
+#### Fixed
+- **Microsoft Store `0x800704cf` "no internet" error under fake-ip**
+  (root-cause fix). The Store UWP process (`WinStore.App.exe`,
+  `StorePurchaseApp.exe`) received `198.18.x.x` synthetic IPs from
+  fake-ip mode. An internal WinHTTP connectivity probe flagged this
+  range as unreachable and aborted, surfacing in the Store as
+  `0x800704cf` (Win32 `ERROR_NETWORK_UNREACHABLE`). Loopback
+  exemption alone (`CheckNetIsolation.exe LoopbackExempt -a`) did
+  not resolve it. Fix: added `+.microsoft.com`, `+.live.com`,
+  `+.mp.microsoft.com`, `+.microsoftstore.com`, `+.onestore.ms` to
+  `fake-ip-filter` so those domains resolve to real IPs. Sniffer
+  still recovers the SNI from the TLS Client Hello, so existing
+  `DOMAIN-SUFFIX` / `PROCESS-NAME` / `RULE-SET,microsoft` rules
+  match and route DIRECT as before.
+- "Microsoft Store failed to initialize" errors: Store backends
+  (`onestore`, `microsoftstore`, `apps.microsoft.com`,
+  `assets.microsoft.com`, `events.data`, `watson`, `pipe.aria`,
+  `msn`, `windowssearch`, `storecatalogrevocation`) were routed
+  through the `Microsoft Services` proxy group, but the WebSocket /
+  SSE real-time connections got interrupted by the group dispatch.
+  Hardcoded `DIRECT` rules at the top now bypass the group for
+  these domains.
+- `Microsoft Services` proxy group had a duplicate `DIRECT` entry
+  (one from `standardProxies`, one from the explicit prepended
+  `["DIRECT", ...]`). Now filtered with
+  `...standardProxies.filter(p => p !== "DIRECT")`.
+- `+.bing.com` removed from `nameserver-policy` so Bing follows
+  the `Microsoft Services` proxy group (default DIRECT, switchable
+  to proxy) instead of being hardcoded to domestic DNS resolution.
 
 ### [desktop-v1.1] - 2026-06-10
 
@@ -58,7 +138,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
   blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`.
 
-[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.1...HEAD
-[mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.2...HEAD
+[mobile-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.2
 [mobile-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.1
+[mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[desktop-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.2
 [desktop-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.1
