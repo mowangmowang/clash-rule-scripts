@@ -152,6 +152,14 @@ const dnsConfig = {
         // ── Apple Music (force domestic DNS for mainland CDN IPs) ──────
         "+.music.apple.com": domesticNameservers,
 
+        // ── Microsoft 关键服务 CDN ─────────────────────────────────────
+        "+.microsoft.com": domesticNameservers,
+        "+.office.com": domesticNameservers,
+        "+.office365.com": domesticNameservers,
+        "+.live.com": domesticNameservers,
+        "+.outlook.com": domesticNameservers,
+        "+.bing.com": domesticNameservers,
+
         // ── General split-routing ──────────────────────────────────────
         // Domestic / private → domestic DNS
         "geosite:private,cn,geolocation-cn": domesticNameservers,
@@ -216,6 +224,12 @@ const ruleProviders = {
         ...ruleProviderCommon,
         "url": `${bm7BaseUrl}/Apple/Apple.yaml`,
         "path": "./ruleset/bm7/apple.yaml"
+    },
+
+    "microsoft": {
+        ...ruleProviderCommon,
+        "url": `${bm7BaseUrl}/Microsoft/Microsoft.yaml`,
+        "path": "./ruleset/bm7/microsoft.yaml"
     },
 
     // ── AI Services ────────────────────────────────────────────────────
@@ -380,6 +394,11 @@ const rules = [
      * §4-3.  Custom Override Rules  (correct rule-set false positives)
      * ═══════════════════════════════════════════════════════
      */
+    // ── Copilot → AI Overseas（后端 API 被墙，强制代理）─────────────────
+    "DOMAIN-SUFFIX,copilot.microsoft.com,AI Overseas",
+    "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
+    "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
+    "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
@@ -416,6 +435,7 @@ const rules = [
      * §4-5.  Platform Service Routing
      * ═══════════════════════════════════════════════════════
      */
+    "RULE-SET,microsoft,Microsoft Services",
     // BM7 Apple rule set includes Apple CDN; routed via Apple Services group.
     "RULE-SET,apple,Apple Services,no-resolve",
 
@@ -537,8 +557,16 @@ function main(config) {
             "+.apple.com",                  // iOS system services (APNs, iCloud auth)
             "+.captive.apple.com",          // iOS captive portal detection
             "+.gstatic.com",                // Android Google Play Services connectivity
-            "+.icloud.com"                  // iCloud sync reliability
+            "+.icloud.com",                 // iCloud sync reliability
+            "+.microsoft.com",              // Microsoft system services
+            "+.msftconnecttest.com"         // Windows/Microsoft connectivity check
         ]
+    };
+
+    // 持久化代理组选择与 fake-ip 映射（重启后不丢失）
+    config["profile"] = {
+        "store-selected": true,
+        "store-fake-ip": true
     };
 
     // ── Regional auto-detection & grouping ─────────────────────────────
@@ -726,18 +754,21 @@ function main(config) {
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg"
         },
         /**
-         * Microsoft Services — default DIRECT  (OneDrive, Office, etc.
-         * are reachable without a proxy in mainland China).
+         * Microsoft Services — defaults to DIRECT (Bing, OneDrive,
+         * Office etc. are accessible in mainland China).
+         * Copilot is already routed to AI Overseas at the rule level.
          */
-        // {
-        //     ...groupBaseOption,
-        //     "name": "Microsoft Services",
-        //     "type": "select",
-        //     "proxies": ["DIRECT", ...standardProxies],
-        //     "include-all": false,
-        //     "url": "http://www.msftconnecttest.com/connecttest.txt",
-        //     "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg",
-        // },
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.COLD,
+            "name": "Microsoft Services",
+            "type": "select",
+            "proxies": ["DIRECT", ...standardProxies],
+            "include-all": true,
+            "url": "http://www.msftconnecttest.com/connecttest.txt",
+            "expected-status": "200",
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg"
+        },
         /**
          * Apple Services — default to proxy.
          * Apple Music and other streaming services rely on foreign CDNs

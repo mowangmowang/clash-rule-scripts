@@ -192,6 +192,19 @@ const dnsConfig = {
         // ── Apple Music (force domestic DNS for mainland CDN IPs) ──────
         "+.music.apple.com": domesticNameservers,
 
+        // ── Microsoft service CDNs (force domestic DNS for mainland CDN IPs) ──
+        "+.microsoft.com":                domesticNameservers,
+        "+.microsoftonline.com":          domesticNameservers,
+        "+.msauth.net":                   domesticNameservers,
+        "+.azure.com":                    domesticNameservers,
+        "+.office.com":                   domesticNameservers,
+        "+.office365.com":                domesticNameservers,
+        "+.live.com":                     domesticNameservers,
+        "+.outlook.com":                  domesticNameservers,
+        "+.bing.com":                     domesticNameservers,
+        "+.windowsupdate.com":            domesticNameservers,
+        "+.mp.microsoft.com":             domesticNameservers,
+
         // ── Steam CDN (must be first — prevents geolocation-!cn
         //     from intercepting these domains) ──────────────────
         // Valve official content delivery (Akamai mainland nodes)
@@ -275,14 +288,11 @@ const ruleProviders = {
     },
 
     // ── Platform services ───────────────────────────────────────
-    // TODO: Uncomment the "microsoft" block to route
-    //       OneDrive / Office / Windows Update traffic.
-    // Microsoft services (partially proxy, partially DIRECT)
-    // "microsoft": {
-    //     ...ruleProviderCommon,
-    //     "url":  `${bm7BaseUrl}/Microsoft/Microsoft.yaml`,
-    //     "path": "./ruleset/bm7/microsoft.yaml"
-    // },
+    "microsoft": {
+        ...ruleProviderCommon,
+        "url":  `${bm7BaseUrl}/Microsoft/Microsoft.yaml`,
+        "path": "./ruleset/bm7/microsoft.yaml"
+    },
     // Apple services (App Store, iCloud, Apple Music, …)
     // NOTE: Apple Music and other streaming services require
     //       proxying — do not switch Apple Services to DIRECT.
@@ -533,15 +543,22 @@ const rules = [
       *  4-4  Custom Override Rules  (correct rule-set false positives)
      * ═══════════════════════════════════════════════════════════
      */
+    // ── Microsoft Store & winget CDNs → DIRECT (force direct for speed) ──
+    "DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,storeedgefd.dsx.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,displaycatalog.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,fe3cr.delivery.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,cdn.winget.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,download.windowsupdate.com,DIRECT",
+    // ── Copilot → AI Overseas (backend APIs are blocked in mainland China) ──
+    "DOMAIN-SUFFIX,copilot.microsoft.com,AI Overseas",
+    "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
+    "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
+    "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
     "DOMAIN,score-6j1.pages.dev,Select Node",
-    // TODO: Uncomment to enable Microsoft custom override rules.
-    // Microsoft services → Microsoft Services group (default DIRECT)
-    // "DOMAIN-SUFFIX,bing.com,Microsoft Services",
-    // "DOMAIN-SUFFIX,microsoft.com,Microsoft Services",
-    // "DOMAIN-SUFFIX,windowsupdate.com,Microsoft Services",
     // Apple services → Apple Services group
     // Streaming services like Apple Music require proxying;
     // do not switch to DIRECT.
@@ -587,8 +604,7 @@ const rules = [
     // BM7 Apple rule set includes Apple CDN; dispatched through
     // the Apple Services proxy group.
     "RULE-SET,apple,Apple Services,no-resolve",
-    // TODO: Uncomment to enable Microsoft rule-set routing.
-    // "RULE-SET,microsoft,Microsoft Services",
+    "RULE-SET,microsoft,Microsoft Services",
 
     /**
      * ═══════════════════════════════════════════════════════════
@@ -711,6 +727,12 @@ function main(config) {
             "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
+    };
+
+    // Persist proxy-group selections and fake-ip mappings across restarts.
+    config["profile"] = {
+        "store-selected": true,
+        "store-fake-ip": true
     };
 
     // ── Auto-detect regions and create proxy groups ────────────
@@ -908,21 +930,23 @@ function main(config) {
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg"
         },
         /**
-         * Microsoft Services — defaults to DIRECT (OneDrive,
-         * Office 365, etc. are reachable in mainland China).
-         * Uses a Microsoft-specific connectivity URL for health
-         * checks.
-         * TODO: Uncomment this block to enable the group.
+         * Microsoft Services — defaults to DIRECT (Bing, OneDrive,
+         * Office, etc. are reachable in mainland China).
+         * Copilot and other proxy-required services are already
+         * routed to AI Overseas at the rule level.
+         * Switch to proxy in the panel to override all Microsoft traffic.
          */
-        // {
-        //     ...groupBaseOption,
-        //     "name":     "Microsoft Services",
-        //     "type":     "select",
-        //     "proxies":  ["DIRECT", ...standardProxies],
-        //     "include-all": false,
-        //     "url": "http://www.msftconnecttest.com/connecttest.txt",
-        //     "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg"
-        // },
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.COLD,
+            "name":     "Microsoft Services",
+            "type":     "select",
+            "proxies":  ["DIRECT", ...standardProxies],
+            "include-all": true,
+            "url": "http://www.msftconnecttest.com/connecttest.txt",
+            "expected-status": "200",
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg"
+        },
         /**
          * Apple Services — defaults to proxy (Apple Music and
          * other streaming services require proxying).

@@ -155,6 +155,19 @@ const dnsConfig = {
         // ── Apple Music（强制国内 DNS 拿大陆 CDN IP，否则直连失败）────────
         "+.music.apple.com": domesticNameservers,
 
+        // ── Microsoft 服务 CDN（强制国内 DNS 拿大陆 CDN IP）───────────────
+        "+.microsoft.com": domesticNameservers,
+        "+.microsoftonline.com": domesticNameservers,
+        "+.msauth.net": domesticNameservers,
+        "+.azure.com": domesticNameservers,
+        "+.office.com": domesticNameservers,
+        "+.office365.com": domesticNameservers,
+        "+.live.com": domesticNameservers,
+        "+.outlook.com": domesticNameservers,
+        "+.bing.com": domesticNameservers,
+        "+.windowsupdate.com": domesticNameservers,
+        "+.mp.microsoft.com": domesticNameservers,
+
         // ── Steam CDN（必须最先，防止被 geolocation-!cn 截胡）──────────────
         // Valve 官方内容分发（使用 Akamai 国内节点）
         "+.steamcontent.com": domesticNameservers,
@@ -230,13 +243,11 @@ const ruleProviders = {
     },
 
     // ── 平台服务 ───────────────────────────────────────────────────────────
-    // TODO: Microsoft 服务（规则集/路由组）暂未启用，如需代理 OneDrive/Office 等请取消注释
-    // 微软服务（OneDrive、Office、Windows Update 等，部分需代理，部分可直连）
-    // "microsoft": {
-    //     ...ruleProviderCommon,
-    //     "url": `${bm7BaseUrl}/Microsoft/Microsoft.yaml`,
-    //     "path": "./ruleset/bm7/microsoft.yaml"
-    // },
+    "microsoft": {
+        ...ruleProviderCommon,
+        "url": `${bm7BaseUrl}/Microsoft/Microsoft.yaml`,
+        "path": "./ruleset/bm7/microsoft.yaml"
+    },
     // Apple 服务（App Store、iCloud、Apple Music 等）
     // 注意：Apple Music 等流媒体需走代理，不可将 Apple Services 组切为直连
     "apple": {
@@ -470,15 +481,22 @@ const rules = [
      * § 4-4. 自定义修正规则（处理规则集的误判）
      * ══════════════════════════════════════════════════════
      */
+    // ── Microsoft Store & winget CDN → DIRECT（CDN 强制直连，避免走代理下载慢）─
+    "DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,storeedgefd.dsx.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,displaycatalog.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,fe3cr.delivery.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,cdn.winget.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,download.windowsupdate.com,DIRECT",
+    // ── Copilot → AI Overseas（后端 API 被墙，强制代理）─────────────────
+    "DOMAIN-SUFFIX,copilot.microsoft.com,AI Overseas",
+    "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
+    "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
+    "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
     "DOMAIN,score-6j1.pages.dev,Select Node",
-    // TODO: 取消注释以启用 Microsoft 自定义修正规则
-    // // 微软服务：强制走 Microsoft Services 组（默认直连，可切代理）
-    // "DOMAIN-SUFFIX,bing.com,Microsoft Services",
-    // "DOMAIN-SUFFIX,microsoft.com,Microsoft Services",
-    // "DOMAIN-SUFFIX,windowsupdate.com,Microsoft Services",
     // Apple：强制走 Apple Services 组（流媒体如 Apple Music 需保持代理，勿切直连）
     "DOMAIN-SUFFIX,apple.com,Apple Services",
     "DOMAIN-SUFFIX,hjw01.com,Select Node",
@@ -519,8 +537,7 @@ const rules = [
      */
     // BM7 Apple 规则集包含 Apple CDN，交给 Apple Services 组统一调度
     "RULE-SET,apple,Apple Services,no-resolve",
-    // TODO: 取消注释以启用 Microsoft 规则集路由
-    // "RULE-SET,microsoft,Microsoft Services",
+    "RULE-SET,microsoft,Microsoft Services",
 
     /**
      * ══════════════════════════════════════════════════════
@@ -623,6 +640,12 @@ function main(config) {
             "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
+    };
+
+    // 持久化代理组选择与 fake-ip 映射（重启后不丢失）
+    config["profile"] = {
+        "store-selected": true,
+        "store-fake-ip": true
     };
 
     // ── 自动识别地区并创建分组 ──────────────────────────────────────────
@@ -793,19 +816,21 @@ function main(config) {
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg"
         },
         /**
-         * Microsoft Services：默认直连（OneDrive、Office 等国内可达）
-         * 使用微软专属连通性检测 URL 作为健康检查
-         * TODO: 取消注释以启用此组
+         * Microsoft Services：默认直连（Bing、OneDrive、Office 等国内可直连）
+         * Copilot 等需要代理的服务已在规则层单独路由到 AI Overseas
+         * 面板中可切为代理以覆盖所有微软流量
          */
-        // {
-        //     ...groupBaseOption,
-        //     "name": "Microsoft Services",
-        //     "type": "select",
-        //     "proxies": ["DIRECT", ...standardProxies],
-        //     "include-all": false,
-        //     "url": "http://www.msftconnecttest.com/connecttest.txt",
-        //     "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg"
-        // },
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.COLD,
+            "name": "Microsoft Services",
+            "type": "select",
+            "proxies": ["DIRECT", ...standardProxies],
+            "include-all": true,
+            "url": "http://www.msftconnecttest.com/connecttest.txt",
+            "expected-status": "200",
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg"
+        },
         /**
          * Apple Services：默认走代理（Apple Music 等流媒体需要代理）
          * 注意：若切为 DIRECT，Apple Music 等依赖境外 CDN 的服务将无法使用
