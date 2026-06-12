@@ -201,7 +201,6 @@ const dnsConfig = {
         "+.office365.com":                domesticNameservers,
         "+.live.com":                     domesticNameservers,
         "+.outlook.com":                  domesticNameservers,
-        "+.bing.com":                     domesticNameservers,
         "+.windowsupdate.com":            domesticNameservers,
         "+.mp.microsoft.com":             domesticNameservers,
 
@@ -543,7 +542,13 @@ const rules = [
       *  4-4  Custom Override Rules  (correct rule-set false positives)
      * ═══════════════════════════════════════════════════════════
      */
-    // ── Microsoft Store / winget CDNs → DIRECT (all mp.microsoft.com subdomains) ──
+    // ── Microsoft Store / winget CDNs → DIRECT ──────────────────────────
+    // IMPORTANT: Microsoft Store is a UWP app. Windows blocks UWP apps from
+    // accessing 127.0.0.1 by default. DIRECT rules alone won't fix it unless:
+    //   a) Enable TUN mode in Clash Verge Rev (Settings → TUN Mode → ON)
+    //   b) Run as Admin in PowerShell:
+    //      CheckNetIsolation.exe LoopbackExempt -a -n=Microsoft.WindowsStore_8wekyb3d8bbwe
+    // Below DIRECT rules take effect once TUN mode is active.
     "DOMAIN-SUFFIX,mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,delivery.mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,winget.microsoft.com,DIRECT",
@@ -718,10 +723,9 @@ function main(config) {
      * inspects TLS SNI / HTTP Host headers to recover the true
      * domain name.
      *
-     * msftconnecttest.com is kept in skip-domain to prevent Windows
-     * connectivity checks from breaking due to fake-ip.  microsoft.com
-     * has been removed to allow sniffer-based routing for Microsoft Store
-     * and service traffic.
+     * msftconnecttest.com / microsoft.com are kept in skip-domain to
+     * prevent Windows connectivity checks and system traffic from breaking
+     * due to fake-ip.
      */
     config["sniffer"] = {
         "enable":       true,
@@ -729,6 +733,7 @@ function main(config) {
         "skip-domain":  [
             "+.mijia.cloud",
             "+.apple.com",
+            "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
     };

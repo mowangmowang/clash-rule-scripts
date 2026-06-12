@@ -164,7 +164,6 @@ const dnsConfig = {
         "+.office365.com": domesticNameservers,
         "+.live.com": domesticNameservers,
         "+.outlook.com": domesticNameservers,
-        "+.bing.com": domesticNameservers,
         "+.windowsupdate.com": domesticNameservers,
         "+.mp.microsoft.com": domesticNameservers,
 
@@ -481,7 +480,13 @@ const rules = [
      * § 4-4. 自定义修正规则（处理规则集的误判）
      * ══════════════════════════════════════════════════════
      */
-    // ── Microsoft Store / winget CDN → DIRECT（覆盖所有 mp.microsoft.com 子域名）─
+    // ── Microsoft Store / winget CDN → DIRECT ─────────────────────────────
+    // 【重要】Microsoft Store 是 UWP 应用，Windows 默认禁止 UWP 访问 127.0.0.1。
+    // 仅靠 DIRECT 规则无法解决 Store 无法联网的问题，需配合以下任一措施：
+    //   a) 开启 Clash Verge Rev 的 TUN 模式（设置 → TUN 模式 → 开启）
+    //   b) PowerShell 管理员运行：
+    //      CheckNetIsolation.exe LoopbackExempt -a -n=Microsoft.WindowsStore_8wekyb3d8bbwe
+    // TUN 模式开启后，以下 DIRECT 规则才会对 Store 生效。
     "DOMAIN-SUFFIX,mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,delivery.mp.microsoft.com,DIRECT",
     "DOMAIN-SUFFIX,winget.microsoft.com,DIRECT",
@@ -635,14 +640,15 @@ function main(config) {
 
     // 【新增】开启 sniffer 域名嗅探
     // 解决浏览器开启安全 DNS (DoH) 时，Clash 只能获取到目标 IP 而无法匹配 DOMAIN 规则的问题
-    // 【注意】skip-domain 中保留 msftconnecttest.com 是为了防止 Windows 连通性检测
-    // 因 fake-ip 而异常。microsoft.com 已移除以便嗅探识别微软 Store/服务流量。
+    // 【注意】skip-domain 中保留 microsoft.com / msftconnecttest.com 是为了防止
+    // Windows 连通性检测等系统流量因 fake-ip 而异常。
     config["sniffer"] = {
         "enable": true,
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",
             "+.apple.com",
+            "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
     };

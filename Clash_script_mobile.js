@@ -158,7 +158,6 @@ const dnsConfig = {
         "+.office365.com": domesticNameservers,
         "+.live.com": domesticNameservers,
         "+.outlook.com": domesticNameservers,
-        "+.bing.com": domesticNameservers,
 
         // ── General split-routing ──────────────────────────────────────
         // Domestic / private → domestic DNS
