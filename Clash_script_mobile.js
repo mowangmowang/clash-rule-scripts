@@ -1,13 +1,15 @@
 /**
  * Clash Meta Mobile - Configuration Script (main.js)
  *
- * @version     1.0
- * @date        2026-06-10
+ * @version     1.2
+ * @date        2026-06-12
  * @target      Clash Meta for Android (2.11+), Stash (iOS)
  * @description Injects DNS, routing rules, proxy groups and regional
- *              auto-grouping into the upstream subscription config.
- *              Derived from the desktop Clash Verge Rev script, stripped
- *              of desktop-only logic (Steam, process-name rules, icons).
+ *              auto-grouping into the upstream subscription config,
+ *              with Microsoft services support (Outlook mobile /
+ *              OneDrive mobile / Authenticator). Derived from the
+ *              desktop Clash Verge Rev script, stripped of
+ *              desktop-only logic (Steam, process-name rules, icons).
  *
  * 【How it works】
  * This file is a JavaScript preprocessor consumed by the Clash Meta

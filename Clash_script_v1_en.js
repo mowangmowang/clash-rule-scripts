@@ -1,8 +1,11 @@
 /**
  * Clash Verge Rev — Main Configuration Script (main.js)
  *
- * @version  1.1
- * @date     2026-06-10
+ * @version  1.2
+ * @date     2026-06-12
+ * @description Injects DNS, routing rules and proxy groups into
+ *              Clash Verge Rev, supporting Steam direct-connect,
+ *              Microsoft services, ad-blocking and regional routing.
  *
  * How it works
  * ────────────

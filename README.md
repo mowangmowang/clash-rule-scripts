@@ -16,9 +16,11 @@
 
 | 文件 | 适用客户端 | 注释语言 | 当前版本 | 字节 |
 |------|-----------|---------|---------|------|
-| `Clash_script_v1.js` | Clash Verge Rev(桌面) | 中文 | v1.1 | 41.5 KB |
-| `Clash_script_v1_en.js` | Clash Verge Rev(桌面) | English | v1.1 | 43.8 KB |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | 中文 | v1.0 | 33.8 KB |
+| `Clash_script_v1.js` | Clash Verge Rev(桌面) | 中文 | v1.2 | 44.6 KB |
+| `Clash_script_v1_en.js` | Clash Verge Rev(桌面) | English | v1.2 | 47.0 KB |
+| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | 中文 | v1.2 | 35.9 KB |
+
+> 字节数为 **撰写时大小**,每次提交都会变,仅作大致参考。
 
 桌面中英两版**功能完全一致**,仅注释语言不同。
 **任何对桌面版的修改必须同步两个文件。**
@@ -150,8 +152,8 @@ flowchart TD
 
 | 客户端 | 当前 tag | commit |
 |--------|---------|--------|
-| Desktop (zh + en) | `desktop-v1.1` | `git log --decorate` |
-| Mobile | `mobile-v1.0` | `git log --decorate` |
+| Desktop (zh + en) | `desktop-v1.2` | `git log --decorate` |
+| Mobile | `mobile-v1.2` | `git log --decorate` |
 
 打 tag 与发版流程见 [AGENTS.md](./AGENTS.md)。
 

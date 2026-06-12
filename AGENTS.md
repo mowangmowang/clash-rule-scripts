@@ -85,7 +85,7 @@ git commit -m "docs(changelog): 记录 <version> 变更"
 # 3. 打 tag
 git tag desktop-v1.2 -m "Desktop v1.2: <变更简述>"
 # 或
-git tag mobile-v1.1  -m "Mobile v1.1: <变更简述>"
+git tag mobile-v1.2  -m "Mobile v1.2: <变更简述>"
 
 # 4. (将来推送时)
 git push origin main --tags
