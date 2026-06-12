@@ -543,13 +543,19 @@ const rules = [
       *  4-4  Custom Override Rules  (correct rule-set false positives)
      * ═══════════════════════════════════════════════════════════
      */
-    // ── Microsoft Store & winget CDNs → DIRECT (force direct for speed) ──
-    "DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,storeedgefd.dsx.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,displaycatalog.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,fe3cr.delivery.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,cdn.winget.microsoft.com,DIRECT",
+    // ── Microsoft Store / winget CDNs → DIRECT (all mp.microsoft.com subdomains) ──
+    "DOMAIN-SUFFIX,mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,delivery.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,winget.microsoft.com,DIRECT",
+    // ── Microsoft Store & Windows auth → DIRECT ──────────────────────────
+    "DOMAIN-SUFFIX,login.live.com,DIRECT",
+    "DOMAIN-SUFFIX,login.windows.net,DIRECT",
+    "DOMAIN-SUFFIX,account.live.com,DIRECT",
+    // ── Windows Update & download CDNs → DIRECT ──────────────────────────
     "DOMAIN-SUFFIX,download.windowsupdate.com,DIRECT",
+    "DOMAIN-SUFFIX,download.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,officecdn.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,wns.windows.com,DIRECT",
     // ── Copilot → AI Overseas (backend APIs are blocked in mainland China) ──
     "DOMAIN-SUFFIX,copilot.microsoft.com,AI Overseas",
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
@@ -712,11 +718,10 @@ function main(config) {
      * inspects TLS SNI / HTTP Host headers to recover the true
      * domain name.
      *
-     * microsoft.com is kept in skip-domain to prevent Windows
-     * connectivity checks and other system traffic from breaking
-     * due to fake-ip.  This is independent of whether Microsoft
-     * routing rules are active — DIRECT traffic does not need
-     * domain-rule matching anyway.
+     * msftconnecttest.com is kept in skip-domain to prevent Windows
+     * connectivity checks from breaking due to fake-ip.  microsoft.com
+     * has been removed to allow sniffer-based routing for Microsoft Store
+     * and service traffic.
      */
     config["sniffer"] = {
         "enable":       true,
@@ -724,7 +729,6 @@ function main(config) {
         "skip-domain":  [
             "+.mijia.cloud",
             "+.apple.com",
-            "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
     };

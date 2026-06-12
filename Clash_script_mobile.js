@@ -399,6 +399,8 @@ const rules = [
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
+    "DOMAIN-SUFFIX,login.live.com,DIRECT",
+    "DOMAIN-SUFFIX,account.live.com,DIRECT",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
@@ -557,9 +559,7 @@ function main(config) {
             "+.apple.com",                  // iOS system services (APNs, iCloud auth)
             "+.captive.apple.com",          // iOS captive portal detection
             "+.gstatic.com",                // Android Google Play Services connectivity
-            "+.icloud.com",                 // iCloud sync reliability
-            "+.microsoft.com",              // Microsoft system services
-            "+.msftconnecttest.com"         // Windows/Microsoft connectivity check
+            "+.icloud.com"                  // iCloud sync reliability
         ]
     };
 

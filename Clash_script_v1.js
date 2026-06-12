@@ -481,13 +481,19 @@ const rules = [
      * § 4-4. 自定义修正规则（处理规则集的误判）
      * ══════════════════════════════════════════════════════
      */
-    // ── Microsoft Store & winget CDN → DIRECT（CDN 强制直连，避免走代理下载慢）─
-    "DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,storeedgefd.dsx.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,displaycatalog.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,fe3cr.delivery.mp.microsoft.com,DIRECT",
-    "DOMAIN-SUFFIX,cdn.winget.microsoft.com,DIRECT",
+    // ── Microsoft Store / winget CDN → DIRECT（覆盖所有 mp.microsoft.com 子域名）─
+    "DOMAIN-SUFFIX,mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,delivery.mp.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,winget.microsoft.com,DIRECT",
+    // ── Microsoft Store & Windows 认证 → DIRECT（登录、帐号管理）───────────
+    "DOMAIN-SUFFIX,login.live.com,DIRECT",
+    "DOMAIN-SUFFIX,login.windows.net,DIRECT",
+    "DOMAIN-SUFFIX,account.live.com,DIRECT",
+    // ── Windows Update / 下载 CDN → DIRECT ────────────────────────────────
     "DOMAIN-SUFFIX,download.windowsupdate.com,DIRECT",
+    "DOMAIN-SUFFIX,download.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,officecdn.microsoft.com,DIRECT",
+    "DOMAIN-SUFFIX,wns.windows.com,DIRECT",
     // ── Copilot → AI Overseas（后端 API 被墙，强制代理）─────────────────
     "DOMAIN-SUFFIX,copilot.microsoft.com,AI Overseas",
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
@@ -629,15 +635,14 @@ function main(config) {
 
     // 【新增】开启 sniffer 域名嗅探
     // 解决浏览器开启安全 DNS (DoH) 时，Clash 只能获取到目标 IP 而无法匹配 DOMAIN 规则的问题
-    // 【注意】skip-domain 中保留 microsoft.com 是为了防止 Windows 连通性检测等系统流量
-    // 因 fake-ip 而异常，这与 Microsoft 路由规则是否启用无关——直连流量无需域名规则匹配。
+    // 【注意】skip-domain 中保留 msftconnecttest.com 是为了防止 Windows 连通性检测
+    // 因 fake-ip 而异常。microsoft.com 已移除以便嗅探识别微软 Store/服务流量。
     config["sniffer"] = {
         "enable": true,
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",
             "+.apple.com",
-            "+.microsoft.com",
             "+.msftconnecttest.com"
         ]
     };
