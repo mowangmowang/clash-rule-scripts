@@ -644,12 +644,12 @@ function main(config) {
 
     // ── Others：聚合所有节点，覆盖非主流地区（KR/DE/UK 等）──────────────
     // 主流地区（HK/JP/US/SG/TW）已有独立分组，其余节点通过此组统一调度。
-    // proxies 显式列出所有节点 + include-all 兜底（确保 proxy-provider 节点也纳入）。
+    // 仅用 include-all 由 Clash 自动注入全部 outbound proxies + proxy providers，
+    // 按名排序且无重复（proxies 字段不列节点，避免与 include-all 作用域重叠）。
     const othersGroup = {
         ...groupBaseOption,
         "name": "Others",
         "type": "select",
-        "proxies": allProxies,
         "include-all": true,
         "icon": `${FLAG_BASE}/un.svg`
     };

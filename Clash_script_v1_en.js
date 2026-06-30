@@ -848,15 +848,15 @@ function main(config) {
     // ── Others: aggregates ALL proxies, covering non-mainstream regions ──
     // Mainstream regions (HK/JP/US/SG/TW) have their own groups; nodes from
     // other regions (KR/DE/UK/etc.) are routed here for unified scheduling.
-    // `proxies` lists every node explicitly, and `include-all: true` is a
-    // fallback that ensures proxy-provider nodes are also pulled in.  This
-    // group serves as an upstream for functional groups so non-mainstream
-    // nodes can be effectively utilised.
+    // Only `include-all: true` is used so Clash injects all outbound proxies
+    // and proxy providers automatically (sorted by name, no duplicates).
+    // The `proxies` field is deliberately omitted: listing node names there
+    // would overlap with `include-all`'s injection scope and cause the nodes
+    // to render twice in the panel.
     const othersGroup = {
         ...groupBaseOption,
         "name":         "Others",
         "type":         "select",
-        "proxies":      allProxies,
         "include-all":  true,
         "icon":         `${FLAG_BASE}/un.svg`
     };

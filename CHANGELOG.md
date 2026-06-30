@@ -40,6 +40,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   group (OpenCode, AI Overseas, Google Services, etc.) can select
   non-mainstream nodes as an upstream.
 
+### Fixed (pending next desktop & mobile release)
+
+- `Others` proxy group rendered nodes twice in the panel. Root cause:
+  the group set both `proxies: allProxies` (outbound proxy names) and
+  `include-all: true` (which also injects all outbound proxies), so
+  outbound nodes were injected via two overlapping paths. Fix: removed
+  the explicit `proxies` list and rely solely on `include-all: true`,
+  matching the `Select Node` group's proven pattern. All nodes still
+  appear (now sorted by name, deduplicated); provider nodes continue
+  to be injected by `include-all`.
+
 ## Mobile release line
 
 ### [mobile-v1.2] - 2026-06-12
