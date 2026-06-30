@@ -125,6 +125,8 @@
 
 下面以一个真实请求(应用要下载 Steam 内容 `steampipe.akamaized.net`)为线索,展示从 DNS 查询到上游代理的完整链路。
 
+<div style="background-color: #ffffff; padding: 14px; border-radius: 6px;">
+
 ```mermaid
 flowchart LR
     A[App 请求<br/>steampipe.akamaized.net] --> B[fake-ip 模式<br/>DNS 拦截]
@@ -134,6 +136,8 @@ flowchart LR
     E --> F[代理组调度<br/>Select Node / 功能组]
     F --> G[节点池<br/>HK / JP / US / SG / TW / Others]
 ```
+
+</div>
 
 **关键节点说明:**
 

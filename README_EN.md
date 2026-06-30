@@ -123,6 +123,8 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 
 The following walkthrough traces a real request (the app downloading Steam content from `steampipe.akamaized.net`) from DNS resolution to upstream proxy selection.
 
+<div style="background-color: #ffffff; padding: 14px; border-radius: 6px;">
+
 ```mermaid
 flowchart LR
     A[App requests<br/>steampipe.akamaized.net] --> B[fake-ip mode<br/>DNS intercept]
@@ -132,6 +134,8 @@ flowchart LR
     E --> F[Proxy group dispatch<br/>Select Node / functional groups]
     F --> G[Node pool<br/>HK / JP / US / SG / TW / Others]
 ```
+
+</div>
 
 **Key points:**
 
