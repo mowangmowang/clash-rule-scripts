@@ -607,6 +607,17 @@ const rules = [
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
+    // ── OpenCode → OpenCode group (Zen gateway / auth / share / docs) ──────
+    // opencode.ai hosts the OpenCode Zen API gateway, OAuth login,
+    // session sharing endpoints and the documentation site — it is the
+    // single unified entry point for opencode's own traffic.
+    // anoma.ly is the parent-company domain (billing / help site).
+    // NOTE: BYOK traffic going directly to third-party LLMs
+    // (api.openai.com, api.anthropic.com, etc.) does NOT traverse this
+    // group; it remains governed by the existing openai rule-set,
+    // proxy list and the Fallback group.
+    "DOMAIN-SUFFIX,opencode.ai,OpenCode",
+    "DOMAIN-SUFFIX,anoma.ly,OpenCode",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
@@ -979,6 +990,30 @@ function main(config) {
             "include-all":     false,
             "proxies":          standardProxies,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg"
+        },
+        /**
+         * OpenCode — own-traffic group for the opencode terminal AI
+         * coding agent.
+         * Covers opencode.ai (Zen API gateway, OAuth login, session
+         * sharing, documentation site) and the parent-company domain
+         * anoma.ly (billing / help site).
+         * Health-check target is the official homepage, guaranteeing
+         * the selected node can actually reach opencode.ai.
+         * NOTE: BYOK traffic going directly to third-party LLMs
+         * (api.openai.com, api.anthropic.com, etc.) does NOT traverse
+         * this group; it stays governed by the openai rule-set, the
+         * proxy list and the Fallback group.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "url":             "https://opencode.ai",
+            "expected-status": "200",
+            "name":            "OpenCode",
+            "type":            "select",
+            "proxies":         standardProxies,
+            "include-all":     false,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg"
         },
         /**
          * Microsoft Services — defaults to DIRECT (Bing, OneDrive,

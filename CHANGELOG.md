@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (pending next desktop & mobile release)
+
+- `OpenCode` proxy group (functional group, placed after `AI Overseas`,
+  `select` type, `WARM` tier, health-check `https://opencode.ai`).
+  Allows independently tuning proxy policy for the opencode terminal
+  AI coding agent's own traffic.
+- Routing rules (in the custom-correction block, before all
+  `RULE-SET`s): `DOMAIN-SUFFIX,opencode.ai,OpenCode` and
+  `DOMAIN-SUFFIX,anoma.ly,OpenCode`.
+  - `opencode.ai` hosts the OpenCode Zen API gateway, OAuth login,
+    session sharing and the documentation site — the unified entry
+    point for opencode's own traffic.
+  - `anoma.ly` is the parent-company domain (billing / help site).
+  - BYOK traffic going directly to third-party LLMs
+    (`api.openai.com`, `api.anthropic.com`, etc.) does NOT traverse
+    this group; it remains governed by the existing `openai` rule-set,
+    the `proxy` list and the `Fallback` group.
+
 ## Mobile release line
 
 ### [mobile-v1.2] - 2026-06-12

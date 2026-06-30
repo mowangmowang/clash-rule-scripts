@@ -537,6 +537,13 @@ const rules = [
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
+    // ── OpenCode → OpenCode 组（Zen 网关 / 登录 / 分享 / 文档）──────────
+    // opencode.ai 承载 OpenCode Zen API 网关、OAuth 登录、会话分享与文档站，
+    // 是 opencode 自有流量的统一入口。anoma.ly 为其母公司域（账单/帮助站）。
+    // 注意：BYOK 直连第三方 LLM 的流量（api.openai.com 等）不走此组，
+    // 由现有 openai 规则集 / proxy / Fallback 统一调度。
+    "DOMAIN-SUFFIX,opencode.ai,OpenCode",
+    "DOMAIN-SUFFIX,anoma.ly,OpenCode",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
@@ -858,6 +865,25 @@ function main(config) {
             "include-all": false,
             "proxies": standardProxies,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg"
+        },
+        /**
+         * OpenCode：opencode 命令行 AI 编程代理的自有流量组
+         * 覆盖 opencode.ai（Zen API 网关 / OAuth 登录 / 会话分享 / 文档站）
+         * 与母公司域 anoma.ly（账单 / 帮助站）。
+         * 健康检查目标用官网首页，确保选中节点能访问 opencode.ai。
+         * 注意：用户 BYOK 直连第三方 LLM（api.openai.com 等）的流量
+         * 不经过此组，仍由 openai 规则集 / proxy / Fallback 调度。
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "url": "https://opencode.ai",
+            "expected-status": "200",
+            "name": "OpenCode",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg"
         },
         /**
          * Microsoft Services：默认直连（Bing、OneDrive、Office 等国内可直连）
