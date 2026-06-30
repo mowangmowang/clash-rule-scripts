@@ -124,52 +124,13 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 The following walkthrough traces a real request (the app downloading Steam content from `steampipe.akamaized.net`) from DNS resolution to upstream proxy selection.
 
 ```mermaid
-flowchart TD
-    Start([App connects<br/>domain: steampipe.akamaized.net])
-
-    subgraph STAGE1["① DNS resolution (fake-ip mode)"]
-        Start --> Q1[Clash intercepts DNS query]
-        Q1 --> Q2{fake-ip-filter<br/>match?}
-        Q2 -->|yes<br/>LAN / Captive / QQ login| Q3[Return real IP]
-        Q2 -->|no| Q4{nameserver-policy<br/>first match wins}
-        Q4 -->|Steam CDN / .cn| Q5[Domestic DoH<br/>Alidns / DNSPod / 360]
-        Q4 -->|Google / YouTube / GFW| Q6[Overseas DoH<br/>Cloudflare / OpenDNS / Mullvad]
-        Q4 -->|other| Q7[fallback verification]
-        Q5 --> Q8[Return fake-IP<br/>198.18.x.x]
-        Q6 --> Q8
-        Q7 --> Q8
-    end
-
-    subgraph STAGE2["② Rule matching (top-down, first match wins)"]
-        Q3 --> R0[Clash intercepts connection<br/>looks up domain]
-        Q8 --> R0
-        R0 --> R1[Steam CDN hardcoded<br/>→ DIRECT]
-        R1 --> R2[QUIC block<br/>→ REJECT]
-        R2 --> R3[Rule-SET ads / privacy<br/>→ Ad Block / Global Block]
-        R3 --> R4[Functional group match<br/>→ Apple / Google / AI / Steam]
-        R4 --> R5[applications<br/>→ DIRECT]
-        R5 --> R6[geosite cn / private<br/>→ DIRECT]
-        R6 --> R7[geosite !cn / gfw<br/>→ Select Node]
-        R7 --> R8[MATCH fallback<br/>→ Select Node]
-    end
-
-    R8 --> ACT{③ Action fork}
-    ACT -->|DIRECT| END1([Local NIC<br/>direct CN Akamai])
-    ACT -->|REJECT| END2([Drop packet])
-    ACT -->|Proxy Group| GRP
-
-    subgraph STAGE3["③ Proxy group dispatch"]
-        GRP[Select Node<br/>top-level entry] --> G2[Latency Test<br/>url-test]
-        GRP --> G3[Failover<br/>fallback]
-        GRP --> G4[Load Balance<br/>hash / RR]
-        GRP --> G5[Functional groups<br/>Apple / Google / AI / OpenCode / Steam]
-        G2 --> POOL[Node pool<br/>HK / JP / US / SG / TW / Others]
-        G3 --> POOL
-        G4 --> POOL
-        G5 --> POOL
-    end
-
-    POOL --> END3([Forward to<br/>upstream proxy])
+flowchart LR
+    A[App requests<br/>steampipe.akamaized.net] --> B[fake-ip mode<br/>DNS intercept]
+    B --> C[nameserver-policy<br/>routes to domestic or overseas DoH]
+    C --> D[Return fake-IP<br/>198.18.x.x]
+    D --> E[Rule matching<br/>first match wins]
+    E --> F[Proxy group dispatch<br/>Select Node / functional groups]
+    F --> G[Node pool<br/>HK / JP / US / SG / TW / Others]
 ```
 
 **Key points:**
@@ -178,8 +139,10 @@ flowchart TD
 |-------|--------|
 | ① DNS | `fake-ip-filter` hit → real IP (LAN / QQ WeChat / Windows Captive) |
 | ① DNS | `nameserver-policy` matches Steam CDN → domestic DoH → domestic CDN IP |
-| ② Rules | First 3 rules are `DIRECT` (Steam CDN / QUIC / applications) |
-| ② Rules | Last 2 rules point to `Select Node` (geosite !cn + MATCH fallback) |
+| ① DNS | Other domains → overseas DoH (Cloudflare / OpenDNS / Mullvad) or fallback verification |
+| ② Rules | First match wins: Steam CDN → DIRECT / QUIC block → REJECT / … |
+| ② Rules | Functional group exact match → Apple / Google / AI / OpenCode / Steam |
+| ② Rules | `RULE-SET,proxy` + `MATCH` fallback → `Select Node` |
 | ③ Dispatch | All groups converge on the node pool, selected via url-test / fallback / load-balance |
 
 </details>
