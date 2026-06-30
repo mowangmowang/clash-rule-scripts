@@ -16,9 +16,9 @@
 
 | 文件 | 适用客户端 | 注释语言 | 当前版本 | 字节 |
 |------|-----------|---------|---------|------|
-| `Clash_script_v1.js` | Clash Verge Rev(桌面) | 中文 | v1.2 | 44.6 KB |
-| `Clash_script_v1_en.js` | Clash Verge Rev(桌面) | English | v1.2 | 47.0 KB |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | 中文 | v1.2 | 35.9 KB |
+| `Clash_script_v1.js` | Clash Verge Rev(桌面) | 中文 | v1.3 | 48.3 KB |
+| `Clash_script_v1_en.js` | Clash Verge Rev(桌面) | English | v1.3 | 51.3 KB |
+| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | 中文 | v1.3 | 39.2 KB |
 
 > 字节数为 **撰写时大小**,每次提交都会变,仅作大致参考。
 
@@ -42,6 +42,46 @@
 Clash 客户端在加载订阅源后,会调用 `main(config)` 传入配置对象。
 脚本**就地修改**这个对象(覆盖 DNS、规则、代理组),然后返回。
 订阅源更新时自定义规则**不会丢失**——因为它们是脚本注入,不是写进 YAML。
+
+## 代理组结构
+
+面板按「常用 / 不常用」两区显示,`Fallback` 是分界线。仅视觉聚合,引用关系不受影响。
+
+### 常用区(`Select Node` → `Fallback`)
+
+| 分组 | 类型 | 说明 |
+|------|------|------|
+| `Select Node` | select | 顶层手动入口,含自动化组 + 全部节点(`include-all`) |
+| `HK - 香港` / `JP - 日本` / `US - 美国` | select | 主流地区,正则自动识别节点名生成 |
+| `Google Services` / `Foreign Media` / `Social Media` | select | 功能组,上游为 `standardProxies` |
+| `AI Overseas` | select | ChatGPT / Gemini 等,健康检查 `chatgpt.com` |
+| `OpenCode` | select | opencode 命令行代理自有流量(见下) |
+| `Microsoft Services` / `Apple Services` / `Steam` | select | 平台服务,默认直连/代理因服务而异 |
+| `Fallback` | select | 兜底组,未被规则命中的流量最终落点 |
+
+### 不常用区(`Fallback` 之后)
+
+| 分组 | 类型 | 说明 |
+|------|------|------|
+| `Others` | select | 聚合**所有节点**(`include-all`),覆盖非主流地区(KR/DE/UK 等) |
+| `SG - 新加坡` / `TW - 台湾` | select | 非主流地区组,正则自动识别 |
+| `Latency Test` | url-test | 自动选延迟最低节点 |
+| `Failover` | fallback | 主节点失效自动切换 |
+| `Load Balance (Hash)` / `Load Balance (Round Robin)` | load-balance | 一致性哈希 / 轮询(均 `hidden`) |
+| `Ad Block` / `Global Block` | select | 拦截组,默认 `REJECT` |
+
+### 地区组识别机制
+
+`regions` 数组定义地区名 + 正则,**逐地区**从 `allProxies` 过滤节点名:
+- 有匹配 → 生成 `select` 组;无匹配 → 跳过
+- CJK 关键词无 `\b`(JS `\b` 对中文无效),英文/数字保留 `\b` 防子串误匹配
+- `regionalGroupNames` 含所有地区组名(含 SG/TW/Others),合入 `standardProxies` 作为功能组可选上游
+
+### OpenCode 组
+
+路由 `opencode.ai`(Zen API 网关 / OAuth 登录 / 会话分享 / 文档站)+ `anoma.ly`(母公司域,账单/帮助站)。
+健康检查用 `https://opencode.ai`。
+**注意**:用户 BYOK 直连第三方 LLM(`api.openai.com` 等)的流量**不走此组**,仍由 `openai` 规则集 / `proxy` 列表 / `Fallback` 调度。
 
 ## 流量处理流程
 
@@ -86,8 +126,8 @@ flowchart TD
         GRP[Select Node<br/>顶层入口] --> G2[Latency Test<br/>url-test]
         GRP --> G3[Failover<br/>fallback]
         GRP --> G4[Load Balance<br/>hash / RR]
-        GRP --> G5[功能组<br/>Apple / Google / AI / Steam]
-        G2 --> POOL[节点池<br/>US / JP / EU / ...]
+        GRP --> G5[功能组<br/>Apple / Google / AI / OpenCode / Steam]
+        G2 --> POOL[节点池<br/>HK / JP / US / SG / TW / Others]
         G3 --> POOL
         G4 --> POOL
         G5 --> POOL
@@ -102,7 +142,7 @@ flowchart TD
 - **`nameserver-policy` 命中 Steam CDN** → 国内 DoH 解析 → 拿到国内 Akamai CDN IP → fake-IP 198.18.x.x
 - **规则链前 3 条都是 `DIRECT`**(Steam CDN、QUIC 阻断后的 Google 流量、applications)——这些流量完全不出本机网卡
 - **规则链最末 2 条**是 `Select Node`(geosite !cn / gfw + MATCH 兜底),承担「被 GFW 屏蔽的境外服务」代理
-- **代理组最终汇聚到「节点池」**(US / JP / EU / HK / SG / ...),按 url-test / fallback / load-balance 策略选出 1 个节点
+- **代理组最终汇聚到「节点池」**(HK / JP / US / SG / TW / Others),按 url-test / fallback / load-balance 策略选出 1 个节点
 
 ### 与「Steam 三大原则」的对应
 
@@ -136,13 +176,14 @@ flowchart TD
 `Clash_script_mobile.js` 从桌面版**显式剥离**了:
 - Steam CDN / 下载直连(桌面场景专属)
 - `applications` 规则提供者(Android 上 selinux 隔离导致进程名匹配不可靠)
-- 所有 `icon` 属性(桌面 GUI 扩展,移动端不渲染)
 - IPv6(蜂窝 IPv6 路由频繁异常,默认关闭)
 - 健康检查间隔调长(省电)
 - 延迟容忍放宽到 50 ms(吸收蜂窝抖动)
 
 并**新增**:
 - captive-portal / connectivity-check 域名
+
+> `icon` 属性在桌面与移动版均保留;桌面渲染,移动端多数客户端忽略但不报错。
 
 ## 版本管理
 
@@ -152,8 +193,8 @@ flowchart TD
 
 | 客户端 | 当前 tag | commit |
 |--------|---------|--------|
-| Desktop (zh + en) | `desktop-v1.2` | `git log --decorate` |
-| Mobile | `mobile-v1.2` | `git log --decorate` |
+| Desktop (zh + en) | `desktop-v1.3` | `git log --decorate` |
+| Mobile | `mobile-v1.3` | `git log --decorate` |
 
 打 tag 与发版流程见 [AGENTS.md](./AGENTS.md)。
 
