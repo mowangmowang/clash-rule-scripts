@@ -766,6 +766,11 @@ function main(config) {
      * - 功能性分组（Steam / Apple / Google 等）允许对特定服务独立配置策略
      * - 所有功能性组都保留 DIRECT 选项，需要直连时可从面板切换
      * - 拦截组（Global Block / Ad Block）使用 REJECT 作为默认策略
+     *
+     * 【显示顺序】常用组在前，不常用组在 Fallback 之后：
+     *   Select Node → 主流地区(HK/JP/US) → 功能组 → Fallback
+     *   → Others/SG/TW → Latency Test/Failover/Load Balance → Ad Block/Global Block
+     * 仅视觉聚合，引用关系不变（Select Node 仍指向 Latency Test 等）。
      */
     config["proxy-groups"] = [
         /**
@@ -787,60 +792,8 @@ function main(config) {
             "include-all": true,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/adjust.svg"
         },
-        /**
-         * Latency Test：自动选择延迟最低的节点
-         * tolerance: 30ms，节点延迟差距小于此值则不切换（防止频繁跳节点）
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.HOT,
-            "name": "Latency Test",
-            "type": "url-test",
-            "tolerance": 30,
-            "include-all": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/speed.svg"
-        },
-        /**
-         * Failover：主节点失效后自动切换到下一个可用节点
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.HOT,
-            "name": "Failover",
-            "type": "fallback",
-            "include-all": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/ambulance.svg"
-        },
-        /**
-         * Load Balance (Hash)：对同一目标域名始终用同一节点（会话一致性）
-         * 适合：需要保持 IP 稳定的服务（如某些网站的登录态绑定 IP）
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.WARM,
-            "name": "Load Balance (Hash)",
-            "type": "load-balance",
-            "strategy": "consistent-hashing",
-            "include-all": true,
-            "hidden": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/merry_go.svg"
-        },
-        /**
-         * Load Balance (Round Robin)：轮询所有节点，均匀分摊流量
-         * 适合：多文件并发下载等不需要 IP 一致性的场景
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.WARM,
-            "name": "Load Balance (Round Robin)",
-            "type": "load-balance",
-            "strategy": "round-robin",
-            "include-all": true,
-            "hidden": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/balance.svg"
-        },
 
-        // ── 功能性服务分组 ──────────────────────────────────────────────────
+        // ── 功能性服务分组（常用区）──────────────────────────────────────
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
@@ -947,24 +900,6 @@ function main(config) {
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/steam.svg"
         },
 
-        // ── 拦截组 ──────────────────────────────────────────────────────────
-        // Ad Block：可在面板手动切为 DIRECT 临时关闭广告拦截（调试用）
-        {
-            ...groupBaseOption,
-            "name": "Ad Block",
-            "type": "select",
-            "proxies": ["REJECT", "DIRECT"],
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/bug.svg"
-        },
-        // Global Block：广告/隐私规则集的流量出口，默认 REJECT
-        {
-            ...groupBaseOption,
-            "name": "Global Block",
-            "type": "select",
-            "proxies": ["REJECT", "DIRECT"],
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/block.svg"
-        },
-
         /**
          * Fallback（兜底组）：所有未被规则命中的流量最终落点
          * 使用 Google 连通性检测，确保选中的节点能访问境外网站。
@@ -982,11 +917,97 @@ function main(config) {
             "include-all": true,
             "url": "https://www.google.com/generate_204",
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/fish.svg"
+        },
+
+        // ── 自动化组（不常用区，Fallback 之后）────────────────────────────
+        /**
+         * Latency Test：自动选择延迟最低的节点
+         * tolerance: 30ms，节点延迟差距小于此值则不切换（防止频繁跳节点）
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.HOT,
+            "name": "Latency Test",
+            "type": "url-test",
+            "tolerance": 30,
+            "include-all": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/speed.svg"
+        },
+        /**
+         * Failover：主节点失效后自动切换到下一个可用节点
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.HOT,
+            "name": "Failover",
+            "type": "fallback",
+            "include-all": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/ambulance.svg"
+        },
+        /**
+         * Load Balance (Hash)：对同一目标域名始终用同一节点（会话一致性）
+         * 适合：需要保持 IP 稳定的服务（如某些网站的登录态绑定 IP）
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Load Balance (Hash)",
+            "type": "load-balance",
+            "strategy": "consistent-hashing",
+            "include-all": true,
+            "hidden": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/merry_go.svg"
+        },
+        /**
+         * Load Balance (Round Robin)：轮询所有节点，均匀分摊流量
+         * 适合：多文件并发下载等不需要 IP 一致性的场景
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Load Balance (Round Robin)",
+            "type": "load-balance",
+            "strategy": "round-robin",
+            "include-all": true,
+            "hidden": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/balance.svg"
+        },
+
+        // ── 拦截组（不常用区末尾）──────────────────────────────────────────
+        // Ad Block：可在面板手动切为 DIRECT 临时关闭广告拦截（调试用）
+        {
+            ...groupBaseOption,
+            "name": "Ad Block",
+            "type": "select",
+            "proxies": ["REJECT", "DIRECT"],
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/bug.svg"
+        },
+        // Global Block：广告/隐私规则集的流量出口，默认 REJECT
+        {
+            ...groupBaseOption,
+            "name": "Global Block",
+            "type": "select",
+            "proxies": ["REJECT", "DIRECT"],
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/block.svg"
         }
     ];
 
-    // 插入自动生成的地区分组到所有代理组的前面
-    config["proxy-groups"].splice(1, 0, ...regionalGroups, othersGroup);
+    // ── 分区插入地区分组 ──────────────────────────────────────────────
+    // 主流地区（HK/JP/US）插在 Select Node 之后，属常用区；
+    // 非主流地区（SG/TW）+ Others 插在 Fallback 之后，属不常用区。
+    const mainstreamGroups = regionalGroups.filter(
+        g => !["SG - 新加坡", "TW - 台湾"].includes(g.name)
+    );
+    const uncommonRegionalGroups = regionalGroups.filter(
+        g => ["SG - 新加坡", "TW - 台湾"].includes(g.name)
+    );
+
+    // 主流地区插在 Select Node 之后
+    config["proxy-groups"].splice(1, 0, ...mainstreamGroups);
+
+    // Others + 非主流地区插在 Fallback 之后
+    const fallbackIdx = config["proxy-groups"].findIndex(g => g.name === "Fallback");
+    config["proxy-groups"].splice(fallbackIdx + 1, 0, othersGroup, ...uncommonRegionalGroups);
 
 
     // 将规则集和规则写入配置，覆盖订阅源原有的规则

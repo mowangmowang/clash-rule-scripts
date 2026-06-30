@@ -51,6 +51,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   appear (now sorted by name, deduplicated); provider nodes continue
   to be injected by `include-all`.
 
+### Changed (pending next desktop & mobile release)
+
+- Proxy group display order reorganised into common / uncommon
+  sections. Common groups stay at the top: `Select Node` →
+  mainstream regions (`HK - 香港` / `JP - 日本` / `US - 美国`) →
+  functional groups (`Google Services` / `Foreign Media` /
+  `Social Media` / `AI Overseas` / `OpenCode` / `Microsoft Services` /
+  `Apple Services` / `Steam`) → `Fallback`. Uncommon groups are placed
+  after `Fallback`: `Others` → `SG - 新加坡` → `TW - 台湾` →
+  `Latency Test` → `Failover` → `Load Balance (Hash)` →
+  `Load Balance (Round Robin)` → `Ad Block` → `Global Block`.
+  Implementation: the `regionalGroups` array is now split into
+  `mainstreamGroups` (HK/JP/US, inserted after `Select Node`) and
+  `uncommonRegionalGroups` (SG/TW, inserted with `Others` after
+  `Fallback` via `findIndex`). This is visual clustering only —
+  reference relationships are unchanged (`Select Node` still lists
+  `Latency Test` / `Failover` / regional groups as upstream,
+  functional groups still reference all regions via
+  `standardProxies`).
+
 ## Mobile release line
 
 ### [mobile-v1.2] - 2026-06-12

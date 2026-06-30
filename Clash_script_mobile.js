@@ -677,6 +677,13 @@ function main(config) {
      * - Functional groups (Google / Apple / Social Media / etc.) allow
      *   independent strategy configuration per service.
      * - All functional groups include DIRECT as an option.
+     *
+     * Display order — common groups first, uncommon groups after
+     * Fallback:
+     *   Select Node → mainstream regions (HK/JP/US) → functional
+     *   groups → Fallback → Others / SG / TW → Latency Test /
+     *   Failover / Load Balance → Ad Block / Global Block.
+     * Visual clustering only; reference relationships unchanged.
      */
     config["proxy-groups"] = [
         /**
@@ -698,64 +705,8 @@ function main(config) {
             "include-all": true,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/adjust.svg"
         },
-        /**
-         * Latency Test — auto-selects the lowest-latency node.
-         * tolerance: 50 ms  (cellular latency fluctuates more than wired).
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.HOT,
-            "name": "Latency Test",
-            "type": "url-test",
-            "tolerance": 50,
-            "include-all": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/speed.svg"
-        },
-        /**
-         * Failover — switches to the next available node when the
-         * primary fails.
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.HOT,
-            "name": "Failover",
-            "type": "fallback",
-            "include-all": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/ambulance.svg"
-        },
-        /**
-         * Load Balance (Hash) — consistent-hashing: the same destination
-         * domain always goes to the same node (session affinity).
-         * Suitable for services that bind sessions to IP.
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.WARM,
-            "name": "Load Balance (Hash)",
-            "type": "load-balance",
-            "strategy": "consistent-hashing",
-            "include-all": true,
-            "hidden": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/merry_go.svg"
-        },
-        /**
-         * Load Balance (Round Robin) — evenly distributes traffic across
-         * all nodes.
-         * Suitable for concurrent multi-file downloads that don't need
-         * IP consistency.
-         */
-        {
-            ...groupBaseOption,
-            ...GROUP_TIERS.WARM,
-            "name": "Load Balance (Round Robin)",
-            "type": "load-balance",
-            "strategy": "round-robin",
-            "include-all": true,
-            "hidden": true,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/balance.svg"
-        },
 
-        // ── Functional service groups ───────────────────────────────────
+        // ── Functional service groups (common) ─────────────────────────
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
@@ -847,25 +798,6 @@ function main(config) {
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/apple.svg"
         },
 
-        // ── Blocking groups ─────────────────────────────────────────────
-        // Ad Block — switch to DIRECT in the dashboard to temporarily
-        // disable ad blocking for debugging.
-        {
-            ...groupBaseOption,
-            "name": "Ad Block",
-            "type": "select",
-            "proxies": ["REJECT", "DIRECT"],
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/bug.svg"
-        },
-        // Global Block — traffic outlet for the privacy rule set.
-        {
-            ...groupBaseOption,
-            "name": "Global Block",
-            "type": "select",
-            "proxies": ["REJECT", "DIRECT"],
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/block.svg"
-        },
-
         /**
          * Fallback (catch-all group) — where all unmatched traffic lands.
          * Uses google.com/generate_204 as the health-check target to
@@ -884,11 +816,102 @@ function main(config) {
             "include-all": true,
             "url": "https://www.google.com/generate_204",
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/fish.svg"
+        },
+
+        // ── Auto groups (uncommon, after Fallback) ─────────────────────
+        /**
+         * Latency Test — auto-selects the lowest-latency node.
+         * tolerance: 50 ms  (cellular latency fluctuates more than wired).
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.HOT,
+            "name": "Latency Test",
+            "type": "url-test",
+            "tolerance": 50,
+            "include-all": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/speed.svg"
+        },
+        /**
+         * Failover — switches to the next available node when the
+         * primary fails.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.HOT,
+            "name": "Failover",
+            "type": "fallback",
+            "include-all": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/ambulance.svg"
+        },
+        /**
+         * Load Balance (Hash) — consistent-hashing: the same destination
+         * domain always goes to the same node (session affinity).
+         * Suitable for services that bind sessions to IP.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Load Balance (Hash)",
+            "type": "load-balance",
+            "strategy": "consistent-hashing",
+            "include-all": true,
+            "hidden": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/merry_go.svg"
+        },
+        /**
+         * Load Balance (Round Robin) — evenly distributes traffic across
+         * all nodes.
+         * Suitable for concurrent multi-file downloads that don't need
+         * IP consistency.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Load Balance (Round Robin)",
+            "type": "load-balance",
+            "strategy": "round-robin",
+            "include-all": true,
+            "hidden": true,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/balance.svg"
+        },
+
+        // ── Blocking groups (end of uncommon section) ──────────────────
+        // Ad Block — switch to DIRECT in the dashboard to temporarily
+        // disable ad blocking for debugging.
+        {
+            ...groupBaseOption,
+            "name": "Ad Block",
+            "type": "select",
+            "proxies": ["REJECT", "DIRECT"],
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/bug.svg"
+        },
+        // Global Block — traffic outlet for the privacy rule set.
+        {
+            ...groupBaseOption,
+            "name": "Global Block",
+            "type": "select",
+            "proxies": ["REJECT", "DIRECT"],
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/block.svg"
         }
     ];
 
-    // Insert auto-generated regional groups behind Select Node.
-    config["proxy-groups"].splice(1, 0, ...regionalGroups, othersGroup);
+    // ── Split regional groups into mainstream / uncommon sections ────
+    // 主流地区（HK/JP/US）插在 Select Node 之后（常用区）；
+    // 非主流地区（SG/TW）+ Others 插在 Fallback 之后（不常用区）。
+    const mainstreamGroups = regionalGroups.filter(
+        g => !["SG - 新加坡", "TW - 台湾"].includes(g.name)
+    );
+    const uncommonRegionalGroups = regionalGroups.filter(
+        g => ["SG - 新加坡", "TW - 台湾"].includes(g.name)
+    );
+
+    // Mainstream regions after Select Node.
+    config["proxy-groups"].splice(1, 0, ...mainstreamGroups);
+
+    // Others + uncommon regions after Fallback.
+    const fallbackIdx = config["proxy-groups"].findIndex(g => g.name === "Fallback");
+    config["proxy-groups"].splice(fallbackIdx + 1, 0, othersGroup, ...uncommonRegionalGroups);
 
     // Write rule-providers and rules into the config, replacing the
     // subscription's original entries.
