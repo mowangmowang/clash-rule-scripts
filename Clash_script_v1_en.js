@@ -807,7 +807,9 @@ function main(config) {
     const regions = [
         { name: "HK - 香港", reg: /(?:香港|\bHK\b|\bHONGKONG\b|\bHong\s?Kong\b)/i },
         { name: "JP - 日本", reg: /(?:日本|\bJP\b|\bJAPAN\b|\bJapan\b)/i            },
-        { name: "US - 美国", reg: /(?:美国|\bUS\b|\bUSA\b|\bUnited\s?States\b)/i   }
+        { name: "US - 美国", reg: /(?:美国|\bUS\b|\bUSA\b|\bUnited\s?States\b)/i   },
+        { name: "SG - 新加坡", reg: /(?:新加坡|\bSG\b|\bSINGAPORE\b|\bSingapore\b)/i },
+        { name: "TW - 台湾",   reg: /(?:台湾|臺灣|臺湾|\bTW\b|\bTAIWAN\b|\bTaiwan\b)/i }
     ];
 
     // Collect all available proxy names.
@@ -818,7 +820,9 @@ function main(config) {
     const FLAG_ICONS = {
         "HK - 香港": "hk.svg",
         "JP - 日本": "jp.svg",
-        "US - 美国": "us.svg"
+        "US - 美国": "us.svg",
+        "SG - 新加坡": "sg.svg",
+        "TW - 台湾":   "tw.svg"
     };
     const FLAG_BASE =
         "https://fastly.jsdelivr.net/gh/clash-verge-rev/" +
@@ -841,7 +845,25 @@ function main(config) {
         return [];
     });
 
-    const regionalGroupNames = regionalGroups.map(g => g.name);
+    // ── Others: aggregates ALL proxies, covering non-mainstream regions ──
+    // Mainstream regions (HK/JP/US/SG/TW) have their own groups; nodes from
+    // other regions (KR/DE/UK/etc.) are routed here for unified scheduling.
+    // `proxies` lists every node explicitly, and `include-all: true` is a
+    // fallback that ensures proxy-provider nodes are also pulled in.  This
+    // group serves as an upstream for functional groups so non-mainstream
+    // nodes can be effectively utilised.
+    const othersGroup = {
+        ...groupBaseOption,
+        "name":         "Others",
+        "type":         "select",
+        "proxies":      allProxies,
+        "include-all":  true,
+        "icon":         `${FLAG_BASE}/un.svg`
+    };
+
+    // Names of auto-generated regional groups (incl. Others, so it becomes
+    // an available upstream for every functional group).
+    const regionalGroupNames = [...regionalGroups.map(g => g.name), "Others"];
 
     // Reusable proxy list shared by functional groups.
     const standardProxies = [
@@ -1109,7 +1131,7 @@ function main(config) {
     ];
 
     // Insert auto-generated regional groups right after Select Node.
-    config["proxy-groups"].splice(1, 0, ...regionalGroups);
+    config["proxy-groups"].splice(1, 0, ...regionalGroups, othersGroup);
 
     // Write rule providers and rules into the config, replacing the
     // subscription's originals.

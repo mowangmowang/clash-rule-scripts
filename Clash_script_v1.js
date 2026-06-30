@@ -708,7 +708,9 @@ function main(config) {
     const regions = [
         { name: "HK - 香港", reg: /(?:香港|\bHK\b|\bHONGKONG\b|\bHong\s?Kong\b)/i },
         { name: "JP - 日本", reg: /(?:日本|\bJP\b|\bJAPAN\b|\bJapan\b)/i            },
-        { name: "US - 美国", reg: /(?:美国|\bUS\b|\bUSA\b|\bUnited\s?States\b)/i   }
+        { name: "US - 美国", reg: /(?:美国|\bUS\b|\bUSA\b|\bUnited\s?States\b)/i   },
+        { name: "SG - 新加坡", reg: /(?:新加坡|\bSG\b|\bSINGAPORE\b|\bSingapore\b)/i },
+        { name: "TW - 台湾",   reg: /(?:台湾|臺灣|臺湾|\bTW\b|\bTAIWAN\b|\bTaiwan\b)/i }
     ];
 
     // 获取所有可用节点名称
@@ -717,7 +719,9 @@ function main(config) {
     const FLAG_ICONS = {
         "HK - 香港": "hk.svg",
         "JP - 日本": "jp.svg",
-        "US - 美国": "us.svg"
+        "US - 美国": "us.svg",
+        "SG - 新加坡": "sg.svg",
+        "TW - 台湾":   "tw.svg"
     };
     const FLAG_BASE = "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/flags";
 
@@ -736,8 +740,21 @@ function main(config) {
         return [];
     });
 
-    // 获取已生成的地区组名称列表
-    const regionalGroupNames = regionalGroups.map(g => g.name);
+    // ── Others：聚合所有节点，覆盖非主流地区（KR/DE/UK 等）──────────────
+    // 主流地区（HK/JP/US/SG/TW）已有独立分组，其余节点通过此组统一调度。
+    // proxies 显式列出所有节点 + include-all 兜底（确保 proxy-provider 节点也纳入）。
+    // 作为功能组上游，让非主流节点被有效利用。
+    const othersGroup = {
+        ...groupBaseOption,
+        "name": "Others",
+        "type": "select",
+        "proxies": allProxies,
+        "include-all": true,
+        "icon": `${FLAG_BASE}/un.svg`
+    };
+
+    // 获取已生成的地区组名称列表（含 Others，使其成为功能组可选上游）
+    const regionalGroupNames = [...regionalGroups.map(g => g.name), "Others"];
     const standardProxies = ["Select Node", "Latency Test", "Failover", "Load Balance (Hash)", "Load Balance (Round Robin)", "DIRECT", ...regionalGroupNames];
 
     /**
@@ -969,7 +986,7 @@ function main(config) {
     ];
 
     // 插入自动生成的地区分组到所有代理组的前面
-    config["proxy-groups"].splice(1, 0, ...regionalGroups);
+    config["proxy-groups"].splice(1, 0, ...regionalGroups, othersGroup);
 
 
     // 将规则集和规则写入配置，覆盖订阅源原有的规则

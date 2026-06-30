@@ -608,7 +608,9 @@ function main(config) {
     const regions = [
         { name: "HK - 香港", reg: /(?:香港|\bHK\b|\bHONGKONG\b|\bHong\s?Kong\b)/i },
         { name: "JP - 日本", reg: /(?:日本|\bJP\b|\bJAPAN\b|\bJapan\b)/i            },
-        { name: "US - 美国", reg: /(?:美国|\bUS\b|\bUSA\b|\bUnited\s?States\b)/i   }
+        { name: "US - 美国", reg: /(?:美国|\bUS\b|\bUSA\b|\bUnited\s?States\b)/i   },
+        { name: "SG - 新加坡", reg: /(?:新加坡|\bSG\b|\bSINGAPORE\b|\bSingapore\b)/i },
+        { name: "TW - 台湾",   reg: /(?:台湾|臺灣|臺湾|\bTW\b|\bTAIWAN\b|\bTaiwan\b)/i }
     ];
 
     // 【Mobile】Icon assets for regional groups.
@@ -616,7 +618,9 @@ function main(config) {
     const FLAG_ICONS = {
         "HK - 香港": "hk.svg",
         "JP - 日本": "jp.svg",
-        "US - 美国": "us.svg"
+        "US - 美国": "us.svg",
+        "SG - 新加坡": "sg.svg",
+        "TW - 台湾":   "tw.svg"
     };
     const FLAG_BASE = "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/flags";
 
@@ -638,8 +642,21 @@ function main(config) {
         return [];
     });
 
-    // Names of auto-generated regional groups.
-    const regionalGroupNames = regionalGroups.map(g => g.name);
+    // ── Others：聚合所有节点，覆盖非主流地区（KR/DE/UK 等）──────────────
+    // 主流地区（HK/JP/US/SG/TW）已有独立分组，其余节点通过此组统一调度。
+    // proxies 显式列出所有节点 + include-all 兜底（确保 proxy-provider 节点也纳入）。
+    const othersGroup = {
+        ...groupBaseOption,
+        "name": "Others",
+        "type": "select",
+        "proxies": allProxies,
+        "include-all": true,
+        "icon": `${FLAG_BASE}/un.svg`
+    };
+
+    // Names of auto-generated regional groups (incl. Others, so it becomes
+    // an available upstream for every functional group).
+    const regionalGroupNames = [...regionalGroups.map(g => g.name), "Others"];
     const standardProxies = [
         "Select Node",
         "Latency Test",
@@ -871,7 +888,7 @@ function main(config) {
     ];
 
     // Insert auto-generated regional groups behind Select Node.
-    config["proxy-groups"].splice(1, 0, ...regionalGroups);
+    config["proxy-groups"].splice(1, 0, ...regionalGroups, othersGroup);
 
     // Write rule-providers and rules into the config, replacing the
     // subscription's original entries.

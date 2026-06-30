@@ -25,6 +25,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (`api.openai.com`, `api.anthropic.com`, etc.) does NOT traverse
     this group; it remains governed by the existing `openai` rule-set,
     the `proxy` list and the `Fallback` group.
+- `SG - 新加坡` and `TW - 台湾` regional proxy groups, auto-detected
+  via regex on proxy names (same mechanism as the existing `HK - 香港`
+  / `JP - 日本` / `US - 美国` groups).  Regex covers both simplified
+  and traditional CJK (`台湾` / `臺灣` / `臺湾`) plus common English
+  aliases, with `\b` guards on Latin alternatives to avoid substring
+  false positives.
+- `Others` proxy group (`select` type, includes all proxies via both
+  an explicit `proxies` list and an `include-all: true` fallback) —
+  aggregates non-mainstream regions (KR / DE / UK / etc.) so they can
+  be referenced by functional groups and used effectively instead of
+  being reachable only through the top-level `Select Node`.
+- `regionalGroupNames` now includes `Others`, so every functional
+  group (OpenCode, AI Overseas, Google Services, etc.) can select
+  non-mainstream nodes as an upstream.
 
 ## Mobile release line
 
