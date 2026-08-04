@@ -171,6 +171,8 @@ const dnsConfig = {
         // ── Microsoft 服务 CDN（强制国内 DNS 拿大陆 CDN IP）───────────────
         "+.microsoft.com": domesticNameservers,
         "+.microsoftonline.com": domesticNameservers,
+        "+.windows.net": domesticNameservers,
+        "+.msidentity.com": domesticNameservers,
         "+.msauth.net": domesticNameservers,
         "+.azure.com": domesticNameservers,
         "+.office.com": domesticNameservers,

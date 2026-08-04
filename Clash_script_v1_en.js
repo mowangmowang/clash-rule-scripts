@@ -215,6 +215,8 @@ const dnsConfig = {
         // ── Microsoft service CDNs (force domestic DNS for mainland CDN IPs) ──
         "+.microsoft.com":                domesticNameservers,
         "+.microsoftonline.com":          domesticNameservers,
+        "+.windows.net":                  domesticNameservers,
+        "+.msidentity.com":               domesticNameservers,
         "+.msauth.net":                   domesticNameservers,
         "+.azure.com":                    domesticNameservers,
         "+.office.com":                   domesticNameservers,
