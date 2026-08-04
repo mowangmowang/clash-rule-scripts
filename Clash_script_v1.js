@@ -546,7 +546,7 @@ const rules = [
     "DOMAIN-SUFFIX,anoma.ly,OpenCode",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
-    "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
+    "DOMAIN-SUFFIX,uhdnow.com,UHD",
     "DOMAIN,score-6j1.pages.dev,Select Node",
     // Apple：强制走 Apple Services 组（流媒体如 Apple Music 需保持代理，勿切直连）
     "DOMAIN-SUFFIX,apple.com,Apple Services",
@@ -569,9 +569,9 @@ const rules = [
     "RULE-SET,youtube,Foreign Media,no-resolve",      // YouTube 单独指定，防止被其他规则截胡
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve", // Netflix、Disney+ 等境外流媒体合集
-    "RULE-SET,telegram,Social Media,no-resolve",
+    "RULE-SET,telegram,Telegram,no-resolve",
     "RULE-SET,facebook,Social Media,no-resolve",
-    "RULE-SET,instagram,Social Media,no-resolve",
+    "RULE-SET,instagram,Instagram,no-resolve",
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -812,6 +812,19 @@ function main(config) {
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/youtube.svg"
         },
+        /**
+         * UHD：专用于 uhdnow.com 等超高清流媒体
+         * 默认走 standardProxies，可在面板中手动选择节点
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "UHD",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png"
+        },
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
@@ -820,6 +833,30 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/telegram.svg"
+        },
+        /**
+         * Telegram：Telegram 专用路由组
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Telegram",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png"
+        },
+        /**
+         * Instagram：Instagram 专用路由组
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Instagram",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png"
         },
         /**
          * AI Overseas：专用于 ChatGPT / Gemini 等 AI 服务

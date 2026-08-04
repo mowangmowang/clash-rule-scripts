@@ -432,7 +432,7 @@ const rules = [
     "DOMAIN-SUFFIX,account.live.com,DIRECT",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
-    "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
+    "DOMAIN-SUFFIX,uhdnow.com,UHD",
     "DOMAIN,score-6j1.pages.dev,Select Node",
     // Apple services → Apple Services group
     // Streaming services like Apple Music require proxying;
@@ -450,9 +450,9 @@ const rules = [
     "RULE-SET,youtube,Foreign Media,no-resolve",       // standalone to avoid misrouting
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve",  // Netflix, Disney+, … combined
-    "RULE-SET,telegram,Social Media,no-resolve",
+    "RULE-SET,telegram,Telegram,no-resolve",
     "RULE-SET,facebook,Social Media,no-resolve",
-    "RULE-SET,instagram,Social Media,no-resolve",
+    "RULE-SET,instagram,Instagram,no-resolve",
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -725,6 +725,18 @@ function main(config) {
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/youtube.svg"
         },
+        /**
+         * UHD - dedicated group for uhdnow.com UHD streaming.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "UHD",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png"
+        },
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
@@ -733,6 +745,30 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/telegram.svg"
+        },
+        /**
+         * Telegram - dedicated routing group.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Telegram",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png"
+        },
+        /**
+         * Instagram - dedicated routing group.
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Instagram",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png"
         },
         /**
          * AI Overseas — dedicated to ChatGPT / Gemini / etc.

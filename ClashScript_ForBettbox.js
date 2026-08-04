@@ -26,6 +26,8 @@ const ruleOptionsEnable = {
 
     // Functional service groups
     "Telegram": true,
+    "Instagram": true,
+    "UHD": true,
     "Google Services": true,
     "Foreign Media": true,
     "Social Media": true,
@@ -53,6 +55,8 @@ const serviceConfigs = [
     { name: "TW - 台湾",       icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/flags/tw.svg", fallback: "Others" },
     { name: "Others",          icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/flags/un.svg", fallback: "Select Node" },
     { name: "Telegram",        icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png", fallback: "Social Media" },
+    { name: "Instagram",       icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png", fallback: "Social Media" },
+    { name: "UHD",             icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png", fallback: "Foreign Media" },
     { name: "Google Services", icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/google.svg", fallback: "Fallback" },
     { name: "Foreign Media",   icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/youtube.svg", fallback: "Fallback" },
     { name: "Social Media",    icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/telegram.svg", fallback: "Fallback" },
@@ -471,7 +475,7 @@ const rules = [
     "DOMAIN-SUFFIX,account.live.com,DIRECT",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
-    "DOMAIN-SUFFIX,uhdnow.com,US - 美国",
+    "DOMAIN-SUFFIX,uhdnow.com,UHD",
     "DOMAIN,score-6j1.pages.dev,Select Node",
     // Apple services → Apple Services group
     // Streaming services like Apple Music require proxying;
@@ -491,7 +495,7 @@ const rules = [
     "RULE-SET,global_media,Foreign Media,no-resolve",  // Netflix, Disney+, … combined
     "RULE-SET,telegram,Telegram,no-resolve",
     "RULE-SET,facebook,Social Media,no-resolve",
-    "RULE-SET,instagram,Social Media,no-resolve",
+    "RULE-SET,instagram,Instagram,no-resolve",
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -816,6 +820,8 @@ function main(config) {
         "Load Balance (Hash)",
         "Load Balance (Round Robin)",
         "Telegram",
+        "Instagram",
+        "UHD",
         "Google Services",
         "Foreign Media",
         "Social Media",
@@ -899,6 +905,15 @@ function main(config) {
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
+            "name": "UHD",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png"
+        },
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
             "name": "Social Media",
             "type": "select",
             "proxies": standardProxies,
@@ -913,6 +928,15 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png"
+        },
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "Instagram",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png"
         },
         /**
          * AI Overseas — dedicated to ChatGPT / Gemini / etc.
