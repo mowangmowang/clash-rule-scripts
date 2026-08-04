@@ -1,11 +1,12 @@
 /**
  * Clash Verge Rev — Main Configuration Script (main.js)
  *
- * @version  1.2
- * @date     2026-06-12
+ * @version  1.4
+ * @date     2026-08-04
  * @description Injects DNS, routing rules and proxy groups into
  *              Clash Verge Rev, supporting Steam direct-connect,
- *              Microsoft services, ad-blocking and regional routing.
+ *              Microsoft services, ad-blocking, regional routing,
+ *              and dedicated Telegram / Instagram / UHD groups.
  *
  * How it works
  * ────────────
@@ -622,7 +623,7 @@ const rules = [
     "DOMAIN-SUFFIX,anoma.ly,OpenCode",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
-    "DOMAIN-SUFFIX,uhdnow.com,UHD",
+    "DOMAIN-SUFFIX,uhdnow.com,UHD",            // UHD streaming uses a dedicated group
     "DOMAIN,score-6j1.pages.dev,Select Node",
     // Apple services → Apple Services group
     // Streaming services like Apple Music require proxying;
@@ -648,9 +649,9 @@ const rules = [
     "RULE-SET,youtube,Foreign Media,no-resolve",
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve",  // Netflix, Disney+, …
-    "RULE-SET,telegram,Telegram,no-resolve",
+    "RULE-SET,telegram,Telegram,no-resolve",   // Telegram uses a dedicated group
     "RULE-SET,facebook,Social Media,no-resolve",
-    "RULE-SET,instagram,Instagram,no-resolve",
+    "RULE-SET,instagram,Instagram,no-resolve", // Instagram uses a dedicated group
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -943,6 +944,8 @@ function main(config) {
         },
         /**
          * UHD - dedicated group for uhdnow.com (UHD streaming).
+         * Upstream is standardProxies; pick a node in the panel.
+         * (Bettbox build: disabling this group falls back to Foreign Media.)
          */
         {
             ...groupBaseOption,
@@ -964,6 +967,8 @@ function main(config) {
         },
         /**
          * Telegram - dedicated routing group.
+         * Routed directly by RULE-SET,telegram; upstream is standardProxies.
+         * (Bettbox build: disabling this group falls back to Social Media.)
          */
         {
             ...groupBaseOption,
@@ -976,6 +981,8 @@ function main(config) {
         },
         /**
          * Instagram - dedicated routing group.
+         * Routed directly by RULE-SET,instagram; upstream is standardProxies.
+         * (Bettbox build: disabling this group falls back to Social Media.)
          */
         {
             ...groupBaseOption,

@@ -1,9 +1,9 @@
 /**
  * Clash Verge Rev - 主配置脚本 (main.js)
  *
- * @version 1.2
- * @date 2026-06-12
- * @description 为 Clash Verge Rev 注入 DNS、路由规则与代理组，实现 Steam 直连、Microsoft 服务支持、广告拦截、地域分流。
+ * @version 1.4
+ * @date 2026-08-04
+ * @description 为 Clash Verge Rev 注入 DNS、路由规则与代理组，实现 Steam 直连、Microsoft 服务支持、广告拦截、地域分流，以及 Telegram / Instagram / UHD 专用分组。
  * 【工作原理】
  * 本文件是一个 JavaScript 预处理脚本，由 Clash Verge Rev 的「配置预处理」功能调用。
  * main(config) 函数接收订阅源（subscribe.yaml）的原始配置作为参数，
@@ -548,7 +548,7 @@ const rules = [
     "DOMAIN-SUFFIX,anoma.ly,OpenCode",
     "DOMAIN-SUFFIX,deepseek.com,DIRECT",
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
-    "DOMAIN-SUFFIX,uhdnow.com,UHD",
+    "DOMAIN-SUFFIX,uhdnow.com,UHD",            // 超高清流媒体走 UHD 专用组
     "DOMAIN,score-6j1.pages.dev,Select Node",
     // Apple：强制走 Apple Services 组（流媒体如 Apple Music 需保持代理，勿切直连）
     "DOMAIN-SUFFIX,apple.com,Apple Services",
@@ -571,9 +571,9 @@ const rules = [
     "RULE-SET,youtube,Foreign Media,no-resolve",      // YouTube 单独指定，防止被其他规则截胡
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve", // Netflix、Disney+ 等境外流媒体合集
-    "RULE-SET,telegram,Telegram,no-resolve",
+    "RULE-SET,telegram,Telegram,no-resolve",   // Telegram 独立分流
     "RULE-SET,facebook,Social Media,no-resolve",
-    "RULE-SET,instagram,Instagram,no-resolve",
+    "RULE-SET,instagram,Instagram,no-resolve", // Instagram 独立分流
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -816,7 +816,8 @@ function main(config) {
         },
         /**
          * UHD：专用于 uhdnow.com 等超高清流媒体
-         * 默认走 standardProxies，可在面板中手动选择节点
+         * 上游为 standardProxies，可在面板中手动选择节点
+         * （Bettbox 版关闭本组时，规则回退到 Foreign Media）
          */
         {
             ...groupBaseOption,
@@ -838,6 +839,8 @@ function main(config) {
         },
         /**
          * Telegram：Telegram 专用路由组
+         * 由 RULE-SET,telegram 直连本组；上游为 standardProxies
+         * （Bettbox 版关闭本组时，规则回退到 Social Media）
          */
         {
             ...groupBaseOption,
@@ -850,6 +853,8 @@ function main(config) {
         },
         /**
          * Instagram：Instagram 专用路由组
+         * 由 RULE-SET,instagram 直连本组；上游为 standardProxies
+         * （Bettbox 版关闭本组时，规则回退到 Social Media）
          */
         {
             ...groupBaseOption,
