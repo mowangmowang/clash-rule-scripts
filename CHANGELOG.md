@@ -8,7 +8,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added (pending next desktop & mobile release)
+_No unreleased changes._
+
+## Mobile release line
+
+### [mobile-v1.4] - 2026-08-04
+
+### Added
+
+- Dedicated `Telegram`, `Instagram` and `UHD` proxy groups (all
+  `select` type, `WARM` tier, upstream `standardProxies`).
+  - `RULE-SET,telegram` now targets `Telegram` (split out from
+    `Social Media`).
+  - `RULE-SET,instagram` now targets `Instagram` (split out from
+    `Social Media`).
+  - `DOMAIN-SUFFIX,uhdnow.com` now targets the new `UHD` group
+    (previously hardcoded to `US - 美国`).
+- `ClashScript_ForBettbox.js` — Bettbox (FlClash core) build derived
+  from the mobile script. Adds visual per-group toggles via
+  `ruleOptionsEnable`; a disabled group is not generated and rules
+  targeting it are rewritten through the fallback chain defined in
+  `serviceConfigs` (e.g. Telegram/Instagram -> `Social Media` ->
+  `Fallback`; UHD -> `Foreign Media` -> `Fallback`). Group names
+  are tracked in `knownGroupNames` so the proxy-reference cleaner
+  keeps real node names and only drops references to disabled groups.
+
+### Fixed
+
+- UHD group icon pointed to a non-existent Qure asset
+  (`Video.png`, 404); replaced with `ForeignMedia.png`.
+- OpenCode group icon used `github.svg` (semantically wrong /
+  missing from the Bettbox icon set); replaced with Qure
+  `Stack.png`.
+
+### Changed
+
+- Common-section group order: `UHD` is placed immediately after
+  `Foreign Media`, and `Telegram` / `Instagram` immediately after
+  `Social Media`.
+- `nameserver-policy` now routes `+.windows.net` and
+  `+.msidentity.com` via `domesticNameservers` for mainland China
+  CDN IPs (desktop CN/EN scripts).
+
+### [mobile-v1.3] - 2026-06-30
+
+### Added
 
 - `OpenCode` proxy group (functional group, placed after `AI Overseas`,
   `select` type, `WARM` tier, health-check `https://opencode.ai`).
@@ -40,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   group (OpenCode, AI Overseas, Google Services, etc.) can select
   non-mainstream nodes as an upstream.
 
-### Fixed (pending next desktop & mobile release)
+### Fixed
 
 - `Others` proxy group rendered nodes twice in the panel. Root cause:
   the group set both `proxies: allProxies` (outbound proxy names) and
@@ -51,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   appear (now sorted by name, deduplicated); provider nodes continue
   to be injected by `include-all`.
 
-### Changed (pending next desktop & mobile release)
+### Changed
 
 - Proxy group display order reorganised into common / uncommon
   sections. Common groups stay at the top: `Select Node` →
@@ -70,8 +114,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Latency Test` / `Failover` / regional groups as upstream,
   functional groups still reference all regions via
   `standardProxies`).
-
-## Mobile release line
 
 ### [mobile-v1.2] - 2026-06-12
 
@@ -122,6 +164,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > into parity.
 
 ## Desktop release line
+
+### [desktop-v1.4] - 2026-08-04
+
+### Added
+
+- Dedicated `Telegram`, `Instagram` and `UHD` proxy groups (all
+  `select` type, `WARM` tier, upstream `standardProxies`).
+  - `RULE-SET,telegram` now targets `Telegram` (split out from
+    `Social Media`).
+  - `RULE-SET,instagram` now targets `Instagram` (split out from
+    `Social Media`).
+  - `DOMAIN-SUFFIX,uhdnow.com` now targets the new `UHD` group
+    (previously hardcoded to `US - 美国`).
+- `ClashScript_ForBettbox.js` — Bettbox (FlClash core) build derived
+  from the mobile script. Adds visual per-group toggles via
+  `ruleOptionsEnable`; a disabled group is not generated and rules
+  targeting it are rewritten through the fallback chain defined in
+  `serviceConfigs` (e.g. Telegram/Instagram -> `Social Media` ->
+  `Fallback`; UHD -> `Foreign Media` -> `Fallback`). Group names
+  are tracked in `knownGroupNames` so the proxy-reference cleaner
+  keeps real node names and only drops references to disabled groups.
+
+### Fixed
+
+- UHD group icon pointed to a non-existent Qure asset
+  (`Video.png`, 404); replaced with `ForeignMedia.png`.
+- OpenCode group icon used `github.svg` (semantically wrong /
+  missing from the Bettbox icon set); replaced with Qure
+  `Stack.png`.
+
+### Changed
+
+- Common-section group order: `UHD` is placed immediately after
+  `Foreign Media`, and `Telegram` / `Instagram` immediately after
+  `Social Media`.
+- `nameserver-policy` now routes `+.windows.net` and
+  `+.msidentity.com` via `domesticNameservers` for mainland China
+  CDN IPs (desktop CN/EN scripts).
+
+### [desktop-v1.3] - 2026-06-30
+
+### Added
+
+- `OpenCode` proxy group (functional group, placed after `AI Overseas`,
+  `select` type, `WARM` tier, health-check `https://opencode.ai`).
+  Allows independently tuning proxy policy for the opencode terminal
+  AI coding agent's own traffic.
+- Routing rules (in the custom-correction block, before all
+  `RULE-SET`s): `DOMAIN-SUFFIX,opencode.ai,OpenCode` and
+  `DOMAIN-SUFFIX,anoma.ly,OpenCode`.
+  - `opencode.ai` hosts the OpenCode Zen API gateway, OAuth login,
+    session sharing and the documentation site — the unified entry
+    point for opencode's own traffic.
+  - `anoma.ly` is the parent-company domain (billing / help site).
+  - BYOK traffic going directly to third-party LLMs
+    (`api.openai.com`, `api.anthropic.com`, etc.) does NOT traverse
+    this group; it remains governed by the existing `openai` rule-set,
+    the `proxy` list and the `Fallback` group.
+- `SG - 新加坡` and `TW - 台湾` regional proxy groups, auto-detected
+  via regex on proxy names (same mechanism as the existing `HK - 香港`
+  / `JP - 日本` / `US - 美国` groups).  Regex covers both simplified
+  and traditional CJK (`台湾` / `臺灣` / `臺湾`) plus common English
+  aliases, with `\b` guards on Latin alternatives to avoid substring
+  false positives.
+- `Others` proxy group (`select` type, includes all proxies via both
+  an explicit `proxies` list and an `include-all: true` fallback) —
+  aggregates non-mainstream regions (KR / DE / UK / etc.) so they can
+  be referenced by functional groups and used effectively instead of
+  being reachable only through the top-level `Select Node`.
+- `regionalGroupNames` now includes `Others`, so every functional
+  group (OpenCode, AI Overseas, Google Services, etc.) can select
+  non-mainstream nodes as an upstream.
+
+### Fixed
+
+- `Others` proxy group rendered nodes twice in the panel. Root cause:
+  the group set both `proxies: allProxies` (outbound proxy names) and
+  `include-all: true` (which also injects all outbound proxies), so
+  outbound nodes were injected via two overlapping paths. Fix: removed
+  the explicit `proxies` list and rely solely on `include-all: true`,
+  matching the `Select Node` group's proven pattern. All nodes still
+  appear (now sorted by name, deduplicated); provider nodes continue
+  to be injected by `include-all`.
+
+### Changed
+
+- Proxy group display order reorganised into common / uncommon
+  sections. Common groups stay at the top: `Select Node` →
+  mainstream regions (`HK - 香港` / `JP - 日本` / `US - 美国`) →
+  functional groups (`Google Services` / `Foreign Media` /
+  `Social Media` / `AI Overseas` / `OpenCode` / `Microsoft Services` /
+  `Apple Services` / `Steam`) → `Fallback`. Uncommon groups are placed
+  after `Fallback`: `Others` → `SG - 新加坡` → `TW - 台湾` →
+  `Latency Test` → `Failover` → `Load Balance (Hash)` →
+  `Load Balance (Round Robin)` → `Ad Block` → `Global Block`.
+  Implementation: the `regionalGroups` array is now split into
+  `mainstreamGroups` (HK/JP/US, inserted after `Select Node`) and
+  `uncommonRegionalGroups` (SG/TW, inserted with `Others` after
+  `Fallback` via `findIndex`). This is visual clustering only —
+  reference relationships are unchanged (`Select Node` still lists
+  `Latency Test` / `Failover` / regional groups as upstream,
+  functional groups still reference all regions via
+  `standardProxies`).
 
 ### [desktop-v1.2] - 2026-06-12
 
@@ -201,9 +346,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
   blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`.
 
-[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.2...HEAD
+[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.4...HEAD
+[mobile-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4
+[mobile-v1.3]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.3
 [mobile-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.2
 [mobile-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.1
 [mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[desktop-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4
+[desktop-v1.3]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.3
 [desktop-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.2
 [desktop-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.1
