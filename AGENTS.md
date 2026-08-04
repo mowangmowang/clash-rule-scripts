@@ -16,7 +16,8 @@
 | `Clash_script_v1.js` | 桌面版(中文) | 偶发 |
 | `Clash_script_v1_en.js` | 桌面版(英文,与中文版**功能完全一致**) | 偶发,**必须与中文版同步** |
 | `Clash_script_mobile.js` | 移动版(从桌面版派生) | 偶发 |
-| `README.md` | 项目说明 | 偶发 |
+| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)版,带分组开关与回退链(从移动版派生) | 偶发 |
+| `README.md` / `README_EN.md` | 项目说明(中/英) | 偶发 |
 | `CHANGELOG.md` | 版本历史 | 每次发版必改 |
 | `.gitattributes` | 强制 LF | 几乎不改 |
 | `.gitignore` | OS / 编辑器忽略 | 几乎不改 |
@@ -25,14 +26,17 @@
 
 ## 修改规范
 
-### 双语同步(强约束)
+### 四脚本同步(强约束)
 
-`Clash_script_v1.js` 和 `Clash_script_v1_en.js` **必须**保持功能一致。
-修改时:
+`Clash_script_v1.js` / `Clash_script_v1_en.js` **必须**功能一致(仅注释语言不同);
+`Clash_script_mobile.js` 从桌面版派生(剥离 Steam/进程名/图标);`ClashScript_ForBettbox.js` 从移动版派生,额外维护分组开关与回退链。
+功能变更时:
 
-1. 先改中文版,确认无误
-2. 再同步改英文版,**逐段对照**(英文版注释更详尽,可能包含中文版未提及的边界说明)
-3. 一次 commit 包含两个文件,信息中说明同步了哪几段
+1. 先改中文版 `Clash_script_v1.js`,确认无误
+2. 再同步改英文版 `Clash_script_v1_en.js`,**逐段对照**(英文版注释更详尽,可能包含中文版未提及的边界说明)
+3. 判断该功能是否适用于移动端:适用则同步改 `Clash_script_mobile.js`
+4. Bettbox 版 `ClashScript_ForBettbox.js`:同步功能改动,并确认新分组已加入 `ruleOptionsEnable`、`serviceConfigs`(带 `fallback`)和 `knownGroupNames`
+5. 一次 commit 包含所有受影响文件
 
 ### 桌面 → 移动派生规则
 
@@ -48,6 +52,12 @@
 - captive-portal / connectivity-check 域名
 - 电池友好型 health-check 间隔
 - IPv6 默认关闭
+
+Bettbox 版(在移动版基础上)**应额外维护**:
+- `ruleOptionsEnable`:每个可开关分组的默认开关
+- `serviceConfigs`:每个可开关分组的 `icon` 与 `fallback`(关闭后规则回退目标)
+- `knownGroupNames`:新分组名必须加入,否则代理引用清理器会把它当未知引用删除
+- 回退链终点必须是始终存在的组(如 `Fallback` / `DIRECT`),不能指向另一个可能被关闭的组而形成断链
 
 ### 不要做的事
 
@@ -67,7 +77,8 @@
    - DNS 解析查询是否走预期的 DoH 服务器
    - 日志中无 JS 异常
 3. 移动版:在 Clash Meta for Android 或 Stash 中同样操作
-4. 桌面版 fake-ip 模式下,启动 Steam 下载并观察速度(应达到带宽上限)
+4. Bettbox 版:逐个关闭/开启 `ruleOptionsEnable` 中的分组,确认被关组不生成、指向它的规则沿 `serviceConfigs` 回退链正确回退、无悬空引用或空组
+5. 桌面版 fake-ip 模式下,启动 Steam 下载并观察速度(应达到带宽上限)
 
 ## 发布流程
 
@@ -78,16 +89,21 @@
 git add <修改的文件>
 git commit -m "<类型>: <简述>"
 
-# 2. 如果改了 CHANGELOG,单独再提交一次
+# 2. 同步中英 README(若功能/分组有变化)
+git add README.md README_EN.md
+git commit -m "docs: update README for <version>"
+
+# 3. 如果改了 CHANGELOG,单独再提交一次
 git add CHANGELOG.md
 git commit -m "docs(changelog): 记录 <version> 变更"
 
-# 3. 打 tag
+# 4. 打 tag
 git tag desktop-v1.2 -m "Desktop v1.2: <变更简述>"
 # 或
 git tag mobile-v1.2  -m "Mobile v1.2: <变更简述>"
+# Bettbox 版不单独打 tag,随移动版发布线发布
 
-# 4. (将来推送时)
+# 5. (将来推送时)
 git push origin main --tags
 ```
 
@@ -101,7 +117,7 @@ git push origin main --tags
 ## Git 工具约定
 
 - 提交信息:Conventional Commits 简版(`feat` / `fix` / `refactor` / `perf` / `docs` / `chore`)
-- 分支:`main` only;3 个文件不需要 dev / feature 分支
+- 分支:`main` only;4 个脚本不需要 dev / feature 分支
 - 远程:本仓库 origin = `https://github.com/mowangmowang/clash-rule-scripts.git`,**已配置**。直接 `git push origin main --tags` 即可推送
 - 换行符:仓库内统一 LF。链式配置(从内到外):
   1. `.gitattributes` 写 `*.js text eol=lf` — 仓库内对所有 .js 强制 LF

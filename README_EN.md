@@ -2,8 +2,8 @@
 
 > Clash config preprocessing scripts — inject DNS, routing rules and proxy groups so fake-ip mode works flawlessly with Steam downloads and more.
 
-[![desktop-v1.3](https://img.shields.io/badge/desktop-v1.3-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.3)
-[![mobile-v1.3](https://img.shields.io/badge/mobile-v1.3-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.3)
+[![desktop-v1.4](https://img.shields.io/badge/desktop-v1.4-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4)
+[![mobile-v1.4](https://img.shields.io/badge/mobile-v1.4-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -17,7 +17,9 @@
 - **All-in-one rule enhancement** — DNS injection, ad blocking, CN/overseas traffic split, Microsoft/Apple/Google routing
 - **Adaptive regional grouping** — automatically detects proxy regions (HK/JP/US/SG/TW), non-mainstream nodes fall under `Others` for unified scheduling
 - **OpenCode dedicated group** — independent policy control for the opencode AI coding agent's Zen gateway traffic
-- **Desktop + mobile synced maintenance** — three scripts, one change set
+- **Dedicated Telegram / Instagram / UHD groups** — Telegram and Instagram split out from Social Media; uhdnow.com UHD streaming gets its own group
+- **Bettbox visual toggles** — Bettbox (FlClash core) build with per-group switches; disabled groups are not generated and rules targeting them fall back along a chain
+- **Desktop + mobile synced maintenance** — four scripts, one change set
 
 ## 🚀 Quick Start
 
@@ -33,6 +35,12 @@
 2. Path: `Clash_script_mobile.js`
 3. Reload config
 
+**Bettbox (FlClash core) / Clash Meta / Stash enhanced build:**
+
+1. Set the JS preprocessing path to `ClashScript_ForBettbox.js`
+2. After reload, enable groups via the `ruleOptionsEnable` toggles in the panel
+3. A disabled group is not generated; rules targeting it automatically fall back through the `serviceConfigs` chain (e.g. Telegram off -> Social Media -> Fallback)
+
 The script runs `main(config)` automatically after the subscription is loaded, enhancing the config in place. Custom rules **survive subscription updates** — they are injected by the script, not written into YAML.
 
 ## 📦 File Overview
@@ -42,12 +50,15 @@ The script runs `main(config)` automatically after the subscription is loaded, e
 | `Clash_script_v1.js` | Clash Verge Rev | Chinese | ✅ | — |
 | `Clash_script_v1_en.js` | Clash Verge Rev | English | ✅ | — |
 | `Clash_script_mobile.js` | Clash Meta for Android / Stash | Chinese | — | ✅ |
+| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta / Stash | English | — | ✅ (visual toggles) |
 
-Desktop CN and EN versions are **functionally identical**; any modification must be synced across both. File names `_v1` / `_mobile` are series code names and do not change with minor versions — versioning is tracked via [CHANGELOG.md](CHANGELOG.md) + git tags. Desktop and mobile are independent release lines.
+Desktop CN and EN versions are **functionally identical**; any modification must be synced across both. `ClashScript_ForBettbox.js` extends the mobile build with per-group toggles and a fallback chain. File names `_v1` / `_mobile` are series code names and do not change with minor versions — versioning is tracked via [CHANGELOG.md](CHANGELOG.md) + git tags. Desktop and mobile are independent release lines.
 
 ## 📊 Proxy Group Structure
 
 The panel displays groups in two sections — **Common** and **Uncommon** — separated by `Fallback`. This is visual clustering only; reference relationships are unchanged.
+Common order: `Select Node` -> HK/JP/US -> Google Services -> Foreign Media -> UHD -> Social Media -> Telegram -> Instagram -> AI Overseas -> OpenCode -> Microsoft/Apple/Steam (desktop only) -> Fallback.
+In the Bettbox build any group can be toggled off; the group is omitted and rules targeting it fall back through the chain defined in `serviceConfigs`.
 
 ### Common section (`Select Node` → `Fallback`)
 
@@ -55,7 +66,9 @@ The panel displays groups in two sections — **Common** and **Uncommon** — se
 |-------|------|-------------|
 | `Select Node` | select | Top-level manual entry, includes automation groups + all proxies (`include-all`) |
 | `HK - 香港` / `JP - 日本` / `US - 美国` | select | Mainstream regions, auto-detected from proxy names via regex |
-| `Google Services` / `Foreign Media` / `Social Media` | select | Functional groups, upstream via `standardProxies` |
+| `Google Services` / `Foreign Media` | select | Functional groups, upstream via `standardProxies` |
+| `UHD` | select | uhdnow.com UHD streaming, upstream via `standardProxies` (Bettbox: falls back to Foreign Media) |
+| `Social Media` / `Telegram` / `Instagram` | select | Social media plus split-out TG/IG groups, upstream via `standardProxies` (Bettbox: TG/IG fall back to Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini etc., health-check `chatgpt.com` |
 | `OpenCode` | select | opencode CLI's own traffic (see below) |
 | `Microsoft Services` / `Apple Services` / `Steam` | select | Platform services, default DIRECT or proxy per service |
@@ -97,8 +110,10 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 | `proxyGroups` | Proxy group definitions | Rename / change selection strategy |
 | `healthCheck.interval` | Node health-check interval | Increase on mobile for battery |
 | `healthCheck.tolerance` | Latency tolerance | 50 ms for cellular networks |
+| `ruleOptionsEnable` (Bettbox) | Whether each group is enabled in the panel | Set `false` to disable; rules auto-fallback |
+| `serviceConfigs` (Bettbox) | Fallback target when a group is disabled | Edit the `fallback` field to rewire the chain |
 
-> After editing: sync CN + EN versions + update CHANGELOG + commit + tag when appropriate.
+> After editing: sync all four scripts for functional changes + update CHANGELOG + commit + tag when appropriate.
 
 ## 🔍 FAQ
 
@@ -113,6 +128,8 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 | Mobile node latency spikes | Tolerance too tight | Set `healthCheck.tolerance` to 50+ ms |
 | Log error `main is not defined` | JS preprocessing not enabled | Enable Script in profile settings |
 | Clash Verge syntax error | File saved with CRLF | Repo enforces LF; configure your editor to save as LF |
+| A group is missing from the Bettbox panel | Its toggle is off | Check `ruleOptionsEnable` and ensure the entry is `true` |
+| Rules error / dangling after disabling a group | Fallback chain unset | Ensure `serviceConfigs` has a `fallback` pointing to an always-enabled group |
 
 </details>
 
@@ -168,7 +185,7 @@ This project references the following third-party open-source resources:
 
 - **Rule sets**: [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script) · [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules)
 - **DNS**: [Alibaba DNS](https://www.alidns.com/) · [DNSPod (Tencent)](https://www.dnspod.cn/) · [Cloudflare](https://developers.cloudflare.com/1.1.1.1/) · [OpenDNS](https://www.opendns.com/) · [Mullvad DNS](https://mullvad.net/en/help/dns-over-https-and-dns-over-tls)
-- **Icons**: [clash-verge-rev/clash-verge-rev.github.io](https://github.com/clash-verge-rev/clash-verge-rev.github.io)
+- **Icons**: [clash-verge-rev/clash-verge-rev.github.io](https://github.com/clash-verge-rev/clash-verge-rev.github.io) · [Koolson/Qure](https://github.com/Koolson/Qure)
 
 ---
 

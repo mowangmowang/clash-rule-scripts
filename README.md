@@ -2,8 +2,8 @@
 
 > Clash 配置预处理脚本 · 自动增强 DNS / 路由 / 代理组,让 fake-ip 模式也能稳跑 Steam 等下载。
 
-[![desktop-v1.3](https://img.shields.io/badge/desktop-v1.3-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.3)
-[![mobile-v1.3](https://img.shields.io/badge/mobile-v1.3-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.3)
+[![desktop-v1.4](https://img.shields.io/badge/desktop-v1.4-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4)
+[![mobile-v1.4](https://img.shields.io/badge/mobile-v1.4-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -19,7 +19,9 @@
 - **一站式规则增强** — 注入 DNS、广告拦截、CN/境外分流、微软/苹果/谷歌等服务路由
 - **自适应地区分组** — 自动识别节点地区(HK/JP/US/SG/TW),非主流节点归属 Others 组统一调度
 - **OpenCode 专用组** — 为 opencode AI 编程代理的 Zen 网关流量提供独立策略控制
-- **桌面 + 移动同步维护** — 三套脚本各司其职,修改一只手同步
+- **Telegram / Instagram / UHD 专用分流** — Telegram、Instagram 从社交媒体拆出独立组,uhdnow.com 超高清流媒体独立调度
+- **Bettbox 可视化开关** — 适配 Bettbox(FlClash core),面板勾选分组即可开关;关闭的组不生成,指向它的规则沿回退链自动回退
+- **桌面 + 移动同步维护** — 四套脚本各司其职,修改一只手同步
 
 ## 🚀 快速开始
 
@@ -35,6 +37,12 @@
 2. 路径填入 `Clash_script_mobile.js`
 3. 重载配置
 
+**Bettbox(FlClash core)/Clash Meta/Stash 增强版:**
+
+1. 配置预处理脚本路径填入 `ClashScript_ForBettbox.js`
+2. 重载配置后,在面板的 `ruleOptionsEnable` 区勾选要启用的分组
+3. 未勾选的分组不会生成,指向它的规则自动沿 `serviceConfigs` 回退链回退(例如关闭 Telegram → 回退 Social Media → 兜底 Fallback)
+
 脚本在订阅源加载后自动执行 `main(config)`,就地增强配置。订阅源更新时自定义规则**不会丢失**——因为它们是脚本注入,不是写进 YAML。
 
 ## 📦 文件一览
@@ -44,12 +52,15 @@
 | `Clash_script_v1.js` | Clash Verge Rev | 中文 | ✅ | — |
 | `Clash_script_v1_en.js` | Clash Verge Rev | English | ✅ | — |
 | `Clash_script_mobile.js` | Clash Meta for Android / Stash | 中文 | — | ✅ |
+| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)/Clash Meta/Stash | English | — | ✅(可视化开关) |
 
-桌面中英两版**功能完全一致**,修改必须同步。文件名 `_v1` / `_mobile` 是系列代号,不随小版本变化;版本号靠 [CHANGELOG.md](CHANGELOG.md) + git tag。桌面与移动是独立发布线。
+桌面中英两版**功能完全一致**,修改必须同步。`ClashScript_ForBettbox.js` 在移动版基础上增加分组开关与回退链。文件名 `_v1` / `_mobile` 是系列代号,不随小版本变化;版本号靠 [CHANGELOG.md](CHANGELOG.md) + git tag。桌面与移动是独立发布线。
 
 ## 📊 代理组结构
 
 面板按「常用 / 不常用」两区显示,`Fallback` 是分界线。仅视觉聚合,引用关系不受影响。
+常用区顺序:`Select Node` → HK/JP/US → Google Services → Foreign Media → UHD → Social Media → Telegram → Instagram → AI Overseas → OpenCode → Microsoft/Apple/Steam(仅桌面) → Fallback。
+Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它的规则沿 `serviceConfigs` 定义的回退链自动回退。
 
 ### 常用区(`Select Node` → `Fallback`)
 
@@ -57,7 +68,9 @@
 |------|------|------|
 | `Select Node` | select | 顶层手动入口,含自动化组 + 全部节点(`include-all`) |
 | `HK - 香港` / `JP - 日本` / `US - 美国` | select | 主流地区,正则自动识别节点名生成 |
-| `Google Services` / `Foreign Media` / `Social Media` | select | 功能组,上游为 `standardProxies` |
+| `Google Services` / `Foreign Media` | select | 功能组,上游为 `standardProxies` |
+| `UHD` | select | uhdnow.com 超高清流媒体专用,上游为 `standardProxies`(Bettbox 关闭回退 Foreign Media) |
+| `Social Media` / `Telegram` / `Instagram` | select | 社交媒体及拆分出的 TG/IG 专用组,上游为 `standardProxies`(Bettbox 关闭 TG/IG 回退 Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini 等,健康检查 `chatgpt.com` |
 | `OpenCode` | select | opencode 命令行代理自有流量(见下) |
 | `Microsoft Services` / `Apple Services` / `Steam` | select | 平台服务,默认直连/代理因服务而异 |
@@ -99,8 +112,10 @@
 | `proxyGroups` | 代理组定义 | 改名 / 改选择策略 |
 | `healthCheck.interval` | 节点健康检查间隔 | 移动端调长省电 |
 | `healthCheck.tolerance` | 延迟容忍 | 蜂窝网络调到 50 ms |
+| `ruleOptionsEnable`(Bettbox) | 各分组是否在面板启用 | 设 `false` 关闭某组,规则自动回退 |
+| `serviceConfigs`(Bettbox) | 关闭分组后的回退目标 | 修改 `fallback` 字段调整回退链 |
 
-> 改完别忘了:中英两版同步改 + 改 CHANGELOG + commit + 视情况打 tag。
+> 改完别忘了:四套脚本同步改(功能变更)+ 改 CHANGELOG + commit + 视情况打 tag。
 
 ## 🔍 FAQ
 
@@ -115,6 +130,8 @@
 | 移动端节点延迟狂跳 | 容忍阈值太严 | 调 `healthCheck.tolerance` 到 50+ ms |
 | 日志报 `main is not defined` | 客户端没启用 JS 预处理 | Profile 设置里勾上 Script |
 | Clash Verge 加载报语法错 | 文件被存为 CRLF | 仓库已强制 LF,确认编辑器存为 LF |
+| Bettbox 面板看不到某分组 | 该分组开关未勾选 | 检查脚本中 `ruleOptionsEnable`,确认对应项为 `true` |
+| 关闭某组后规则报错/悬空 | 回退链未配置 | 确认 `serviceConfigs` 中该组的 `fallback` 指向一个始终启用的组 |
 
 </details>
 
@@ -170,7 +187,7 @@ flowchart LR
 
 - **规则集**: [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script) · [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules)
 - **DNS**: [阿里云 DNS](https://www.alidns.com/) · [腾讯 DNSPod](https://www.dnspod.cn/) · [Cloudflare](https://developers.cloudflare.com/1.1.1.1/) · [OpenDNS](https://www.opendns.com/) · [Mullvad DNS](https://mullvad.net/en/help/dns-over-https-and-dns-over-tls)
-- **图标**: [clash-verge-rev/clash-verge-rev.github.io](https://github.com/clash-verge-rev/clash-verge-rev.github.io)
+- **图标**: [clash-verge-rev/clash-verge-rev.github.io](https://github.com/clash-verge-rev/clash-verge-rev.github.io) · [Koolson/Qure](https://github.com/Koolson/Qure)
 
 ---
 
