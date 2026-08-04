@@ -19,7 +19,7 @@ jobs:
 
       - name: Syntax check
         run: |
-          for f in Clash_script_*.js; do
+          for f in Clash*.js; do
             echo "Checking $f"
             node --check "$f"
           done
