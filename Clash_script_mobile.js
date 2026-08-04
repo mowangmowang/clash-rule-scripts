@@ -735,7 +735,7 @@ function main(config) {
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png"
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ForeignMedia.png"
         },
         {
             ...groupBaseOption,
@@ -800,7 +800,7 @@ function main(config) {
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg"
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Stack.png"
         },
         /**
          * Microsoft Services — defaults to DIRECT (Bing, OneDrive,

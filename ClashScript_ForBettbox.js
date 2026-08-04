@@ -56,12 +56,12 @@ const serviceConfigs = [
     { name: "Others",          icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/flags/un.svg", fallback: "Select Node" },
     { name: "Telegram",        icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png", fallback: "Social Media" },
     { name: "Instagram",       icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png", fallback: "Social Media" },
-    { name: "UHD",             icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png", fallback: "Foreign Media" },
+    { name: "UHD",             icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ForeignMedia.png", fallback: "Foreign Media" },
     { name: "Google Services", icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/google.svg", fallback: "Fallback" },
     { name: "Foreign Media",   icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/youtube.svg", fallback: "Fallback" },
     { name: "Social Media",    icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/telegram.svg", fallback: "Fallback" },
     { name: "AI Overseas",     icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg", fallback: "Fallback" },
-    { name: "OpenCode",        icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg", fallback: "AI Overseas" },
+    { name: "OpenCode",        icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Stack.png", fallback: "AI Overseas" },
     { name: "Microsoft Services", icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/microsoft.svg", fallback: "DIRECT" },
     { name: "Apple Services",  icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/apple.svg", fallback: "Fallback" },
     { name: "Ad Block",        icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/bug.svg", fallback: "DIRECT" },
@@ -909,7 +909,7 @@ function main(config) {
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Video.png"
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ForeignMedia.png"
         },
         {
             ...groupBaseOption,
@@ -968,7 +968,7 @@ function main(config) {
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg"
+            "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Stack.png"
         },
         /**
          * Microsoft Services — defaults to DIRECT (Bing, OneDrive,
