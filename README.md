@@ -9,7 +9,7 @@
 
 [🇨🇳 **中文**](README.md) · [🇬🇧 English](README_EN.md)
 
-[✨ 亮点](#亮点) · [🚀 快速开始](#快速开始) · [📦 文件一览](#文件一览) · [📊 代理组结构](#代理组结构) · [⚙️ 可定制点](#可定制点) · [🔍 FAQ](#faq) · [📜 CHANGELOG](CHANGELOG.md)
+[✨ 亮点](#亮点) · [🚀 使用方法](#使用方法) · [📦 文件一览](#文件一览) · [📊 代理组结构](#代理组结构) · [⚙️ 可定制点](#可定制点) · [🔍 FAQ](#faq) · [📜 CHANGELOG](CHANGELOG.md)
 
 ---
 
@@ -23,27 +23,72 @@
 - **Bettbox 可视化开关** — 适配 Bettbox(FlClash core),面板勾选分组即可开关;关闭的组不生成,指向它的规则沿回退链自动回退
 - **桌面 + 移动同步维护** — 四套脚本各司其职,修改一只手同步
 
-## 🚀 快速开始
+## 🚀 使用方法
 
-**桌面(Clash Verge Rev):**
+> [!IMPORTANT]
+> ⚠️ 本脚本仅用于**覆写机场提供的订阅配置**,不建议覆写自行编写的配置。脚本在订阅加载后执行 `main(config)`,就地增强 DNS / 路由 / 代理组;订阅更新时自定义规则不会丢失(由脚本运行时注入,不写进订阅 YAML)。
 
-1. Profiles → 选一个 profile → 预处理(Processing) → Script
-2. `Clash_script_v1.js`(中文)或 `Clash_script_v1_en.js`(英文)
-3. 填入脚本绝对路径,重载 profile
+### 1. 选择脚本
 
-**移动(Clash Meta for Android / Stash):**
+| 脚本 | 适用客户端 | 注释 |
+|------|-----------|------|
+| `Clash_script_v1.js` | Clash Verge Rev(Windows / macOS / Linux) | 中文 |
+| `Clash_script_v1_en.js` | Clash Verge Rev(Windows / macOS / Linux) | English |
+| `Clash_script_mobile.js` | Clash Meta for Android / Stash(iOS) | 中文 |
+| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)/ Clash Meta / Stash | English,带可视化分组开关 |
 
-1. 设置 → 脚本 / Script → 启用 JS 预处理
-2. 路径填入 `Clash_script_mobile.js`
+桌面中英两版功能完全一致,任选其一;Bettbox 版额外提供面板分组开关与回退链,详见[代理组结构](#代理组结构)。
+
+### 2. 复制链接(或下载文件)
+
+**jsDelivr CDN(推荐,国内可访问,跟随最新版):**
+
+```txt
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script_v1_en.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script_mobile.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
+```
+
+**锁定版本(把 `@main` 换成 tag,如 `@desktop-v1.4`,避免自动更新):**
+
+```txt
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.4/Clash_script_v1.js
+```
+
+**GitHub 原始链接(CDN 不可用时备用):**
+
+```txt
+https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_script_v1.js
+```
+
+> 也可以直接在[发布页](https://github.com/mowangmowang/clash-rule-scripts/releases)下载对应 `.js` 文件,使用本地路径导入。
+
+### 3. 导入客户端
+
+**Clash Verge Rev(桌面):**
+
+1. Profiles(配置)→ 新建(New)→ 类型选 **Script**
+2. 粘贴上面的脚本链接,或选择已下载的本地 `.js` 文件
+3. 保存后让该脚本与你的订阅 profile 关联,重载配置
+
+**Clash Meta for Android:**
+
+1. 设置 → 覆写(Override)→ 启用 JavaScript 覆写
+2. 新建覆写项,粘贴脚本链接或代码
+3. 回到配置页重载
+
+**Stash(iOS):**
+
+1. 设置 → 覆写脚本(Override Script)
+2. 粘贴脚本链接或代码
 3. 重载配置
 
-**Bettbox(FlClash core)/Clash Meta/Stash 增强版:**
+**Bettbox(FlClash core):**
 
-1. 配置预处理脚本路径填入 `ClashScript_ForBettbox.js`
-2. 重载配置后,在面板的 `ruleOptionsEnable` 区勾选要启用的分组
-3. 未勾选的分组不会生成,指向它的规则自动沿 `serviceConfigs` 回退链回退(例如关闭 Telegram → 回退 Social Media → 兜底 Fallback)
-
-脚本在订阅源加载后自动执行 `main(config)`,就地增强配置。订阅源更新时自定义规则**不会丢失**——因为它们是脚本注入,不是写进 YAML。
+1. 配置 → 覆写脚本,粘贴 `ClashScript_ForBettbox.js` 的链接
+2. 重载配置后,在策略组面板勾选要启用的分组(`ruleOptionsEnable`)
+3. 未勾选的组不生成,指向它的规则自动沿 `serviceConfigs` 回退链回退(例如关闭 Telegram → Social Media → Fallback;关闭 UHD → Foreign Media → Fallback)
 
 ## 📦 文件一览
 

@@ -21,27 +21,72 @@
 - **Bettbox visual toggles** — Bettbox (FlClash core) build with per-group switches; disabled groups are not generated and rules targeting them fall back along a chain
 - **Desktop + mobile synced maintenance** — four scripts, one change set
 
-## 🚀 Quick Start
+## 🚀 Usage
 
-**Desktop (Clash Verge Rev):**
+> [!IMPORTANT]
+> ⚠️ This script is intended to **override an airport-provided subscription config**; it is not recommended for overriding a hand-written config. The script runs `main(config)` after the subscription loads, enhancing DNS / routing / proxy groups in place. Custom rules survive subscription updates because they are injected at runtime, not written into the subscription YAML.
 
-1. Profiles → select a profile → Processing → Script
-2. `Clash_script_v1.js` (Chinese comments) or `Clash_script_v1_en.js` (English comments)
-3. Fill in the absolute script path, reload the profile
+### 1. Pick a script
 
-**Mobile (Clash Meta for Android / Stash):**
+| Script | Client | Comments |
+|--------|--------|----------|
+| `Clash_script_v1.js` | Clash Verge Rev (Windows / macOS / Linux) | Chinese |
+| `Clash_script_v1_en.js` | Clash Verge Rev (Windows / macOS / Linux) | English |
+| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | Chinese |
+| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta / Stash | English, with visual group toggles |
 
-1. Settings → Script → enable JS preprocessing
-2. Path: `Clash_script_mobile.js`
-3. Reload config
+The desktop CN and EN builds are functionally identical — pick either. The Bettbox build additionally adds per-group panel toggles and a fallback chain; see [Proxy Group Structure](#proxy-group-structure).
 
-**Bettbox (FlClash core) / Clash Meta / Stash enhanced build:**
+### 2. Copy a link (or download the file)
 
-1. Set the JS preprocessing path to `ClashScript_ForBettbox.js`
-2. After reload, enable groups via the `ruleOptionsEnable` toggles in the panel
-3. A disabled group is not generated; rules targeting it automatically fall back through the `serviceConfigs` chain (e.g. Telegram off -> Social Media -> Fallback)
+**jsDelivr CDN (recommended, follows latest):**
 
-The script runs `main(config)` automatically after the subscription is loaded, enhancing the config in place. Custom rules **survive subscription updates** — they are injected by the script, not written into YAML.
+```txt
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script_v1_en.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script_mobile.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
+```
+
+**Pin a version (replace `@main` with a tag such as `@desktop-v1.4` to opt out of auto-updates):**
+
+```txt
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.4/Clash_script_v1.js
+```
+
+**GitHub raw link (fallback if the CDN is unavailable):**
+
+```txt
+https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_script_v1.js
+```
+
+> You can also download the `.js` file directly from the [releases page](https://github.com/mowangmowang/clash-rule-scripts/releases) and import it by local path.
+
+### 3. Import into your client
+
+**Clash Verge Rev (desktop):**
+
+1. Profiles → New → type **Script**
+2. Paste the script link above, or select a downloaded local `.js` file
+3. Save, associate the script with your subscription profile, and reload
+
+**Clash Meta for Android:**
+
+1. Settings → Override → enable JavaScript override
+2. Create a new override and paste the script link or code
+3. Reload your config
+
+**Stash (iOS):**
+
+1. Settings → Override Script
+2. Paste the script link or code
+3. Reload your config
+
+**Bettbox (FlClash core):**
+
+1. Config → Override Script, paste the `ClashScript_ForBettbox.js` link
+2. After reload, enable groups via the `ruleOptionsEnable` toggles in the group panel
+3. A disabled group is not generated; rules targeting it automatically fall back through the `serviceConfigs` chain (e.g. Telegram off -> Social Media -> Fallback; UHD off -> Foreign Media -> Fallback)
 
 ## 📦 File Overview
 
