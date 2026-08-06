@@ -104,7 +104,7 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 ## 📊 代理组结构
 
 面板按「常用 / 不常用」两区显示,`Fallback` 是分界线。仅视觉聚合,引用关系不受影响。
-常用区顺序:`Select Node` → HK/JP/US → Google Services → Foreign Media → UHD → Social Media → Telegram → Instagram → AI Overseas → OpenCode → Microsoft/Apple/Steam(仅桌面) → Fallback。
+常用区顺序:`Select Node` → HK/JP/US → Google Services → GitHub → Foreign Media → UHD → Social Media → Telegram → Instagram → AI Overseas → OpenCode → Microsoft/Apple/Steam(仅桌面) → Fallback。
 Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它的规则沿 `serviceConfigs` 定义的回退链自动回退。
 
 ### 常用区(`Select Node` → `Fallback`)
@@ -113,7 +113,9 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 |------|------|------|
 | `Select Node` | select | 顶层手动入口,含自动化组 + 全部节点(`include-all`) |
 | `HK - 香港` / `JP - 日本` / `US - 美国` | select | 主流地区,正则自动识别节点名生成 |
-| `Google Services` / `Foreign Media` | select | 功能组,上游为 `standardProxies` |
+| `Google Services` | select | 谷歌服务,上游为 `standardProxies` |
+| `GitHub` | select | GitHub 系服务(github.com / ghcr.io / npm / Copilot 等),上游 `standardProxies`(Bettbox 关闭回退 Fallback) |
+| `Foreign Media` | select | 境外流媒体(YouTube / Netflix 等),上游为 `standardProxies` |
 | `UHD` | select | uhdnow.com 超高清流媒体专用,上游为 `standardProxies`(Bettbox 关闭回退 Foreign Media) |
 | `Social Media` / `Telegram` / `Instagram` | select | 社交媒体及拆分出的 TG/IG 专用组,上游为 `standardProxies`(Bettbox 关闭 TG/IG 回退 Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini 等,健康检查 `chatgpt.com` |

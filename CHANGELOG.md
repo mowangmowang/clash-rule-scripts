@@ -8,7 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Added
+
+- `GitHub` proxy group (`select` type, `WARM` tier, upstream
+  `standardProxies`, placed immediately after `Google Services`).
+  Wired to the blackmatrix7 `GitHub.yaml` rule-set, covering
+  github.com, githubusercontent.com, ghcr.io, npmjs.com,
+  githubcopilot.com, atom.io and related domains. The Bettbox build
+  exposes it as a visual toggle that falls back to `Fallback` when
+  disabled.
 
 ## Mobile release line
 
