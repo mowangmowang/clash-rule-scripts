@@ -29,6 +29,7 @@ const ruleOptionsEnable = {
     "Instagram": true,
     "UHD": true,
     "Google Services": true,
+    "GitHub": true,
     "Foreign Media": true,
     "Social Media": true,
     "AI Overseas": true,
@@ -58,6 +59,7 @@ const serviceConfigs = [
     { name: "Instagram",       icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png", fallback: "Social Media" },
     { name: "UHD",             icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ForeignMedia.png", fallback: "Foreign Media" },
     { name: "Google Services", icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/google.svg", fallback: "Fallback" },
+    { name: "GitHub",          icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg", fallback: "Fallback" },
     { name: "Foreign Media",   icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/youtube.svg", fallback: "Fallback" },
     { name: "Social Media",    icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/telegram.svg", fallback: "Fallback" },
     { name: "AI Overseas",     icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/chatgpt.svg", fallback: "Fallback" },
@@ -306,6 +308,12 @@ const ruleProviders = {
         "url": `${bm7BaseUrl}/Google/Google.yaml`,
         "path": "./ruleset/bm7/google.yaml"
     },
+    // GitHub services (github.com / ghcr.io / npmjs.com / Copilot)
+    "github": {
+        ...ruleProviderCommon,
+        "url": `${bm7BaseUrl}/GitHub/GitHub.yaml`,
+        "path": "./ruleset/bm7/github.yaml"
+    },
     "youtube": {
         ...ruleProviderCommon,
         "url": `${bm7BaseUrl}/YouTube/YouTube.yaml`,
@@ -500,6 +508,7 @@ const rules = [
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
     "RULE-SET,google,Google Services,no-resolve",
+    "RULE-SET,github,GitHub,no-resolve",   // GitHub services (github.com, ghcr.io, npm, ...)
 
     // Loyalsoldier proxy list (catch-all for commonly blocked domains)
     "RULE-SET,proxy,Select Node,no-resolve",
@@ -823,6 +832,7 @@ function main(config) {
         "Instagram",
         "UHD",
         "Google Services",
+        "GitHub",
         "Foreign Media",
         "Social Media",
         "AI Overseas",
@@ -892,6 +902,20 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/google.svg"
+        },
+        {
+            /**
+             * GitHub - github.com / ghcr.io / npmjs.com and related GitHub services.
+             * Routed by RULE-SET,github; upstream is standardProxies.
+             * Disabling this group falls back to Fallback.
+             */
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "GitHub",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg"
         },
         {
             ...groupBaseOption,

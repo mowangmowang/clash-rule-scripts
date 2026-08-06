@@ -288,6 +288,12 @@ const ruleProviders = {
         "url": `${bm7BaseUrl}/Google/Google.yaml`,
         "path": "./ruleset/bm7/google.yaml"
     },
+    // GitHub 系服务（github.com / ghcr.io / npmjs.com / Copilot 等）
+    "github": {
+        ...ruleProviderCommon,
+        "url": `${bm7BaseUrl}/GitHub/GitHub.yaml`,
+        "path": "./ruleset/bm7/github.yaml"
+    },
     // YouTube 单独分出，精确命中，避免被 GlobalMedia 或其他规则误判
     "youtube": {
         ...ruleProviderCommon,
@@ -579,6 +585,7 @@ const rules = [
     "RULE-SET,discord,Social Media,no-resolve",
     "RULE-SET,google,Google Services,no-resolve",
     "RULE-SET,steam,Steam,no-resolve",                // Steam 商店/社区（下载 CDN 已在顶部处理）
+    "RULE-SET,github,GitHub,no-resolve",   // GitHub 系服务独立分流（github.com / ghcr.io / npm 等）
 
     // Loyalsoldier 代理列表（兜底覆盖常见被墙域名，已合并原 gfw 规则集）
     "RULE-SET,proxy,Select Node,no-resolve",
@@ -804,6 +811,20 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/google.svg"
+        },
+        {
+            /**
+             * GitHub：github.com / ghcr.io / npmjs.com 等 GitHub 系服务
+             * 由 RULE-SET,github 直连本组；上游为 standardProxies
+             * （Bettbox 版关闭本组时，规则回退到 Fallback）
+             */
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "GitHub",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg"
         },
         {
             ...groupBaseOption,
