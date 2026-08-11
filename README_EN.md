@@ -17,7 +17,7 @@
 - **All-in-one rule enhancement** — DNS injection, ad blocking, CN/overseas traffic split, Microsoft/Apple/Google routing
 - **Adaptive regional grouping** — automatically detects proxy regions (HK/JP/US/SG/TW), non-mainstream nodes fall under `Others` for unified scheduling
 - **OpenCode dedicated group** — independent policy control for the opencode AI coding agent's Zen gateway traffic
-- **Dedicated Telegram / Instagram / UHD groups** — Telegram and Instagram split out from Social Media; uhdnow.com UHD streaming gets its own group
+- **Dedicated Telegram / Instagram / UHD / VK groups** — Telegram and Instagram split out from Social Media; uhdnow.com UHD streaming gets its own group; all VK ecosystem domains (social / video / VK Play) get dedicated routing
 - **Bettbox visual toggles** — Bettbox (FlClash core) build with per-group switches; disabled groups are not generated and rules targeting them fall back along a chain
 - **Desktop + mobile synced maintenance** — four scripts, one change set
 
@@ -102,7 +102,7 @@ Desktop CN and EN versions are **functionally identical**; any modification must
 ## 📊 Proxy Group Structure
 
 The panel displays groups in two sections — **Common** and **Uncommon** — separated by `Fallback`. This is visual clustering only; reference relationships are unchanged.
-Common order: `Select Node` -> HK/JP/US -> Google Services -> GitHub -> Foreign Media -> UHD -> Social Media -> Telegram -> Instagram -> AI Overseas -> OpenCode -> Microsoft/Apple/Steam (desktop only) -> Fallback.
+Common order: `Select Node` -> HK/JP/US -> Google Services -> GitHub -> Foreign Media -> UHD -> Social Media -> Telegram -> Instagram -> VK -> AI Overseas -> OpenCode -> Microsoft/Apple/Steam (desktop only) -> Fallback.
 In the Bettbox build any group can be toggled off; the group is omitted and rules targeting it fall back through the chain defined in `serviceConfigs`.
 
 ### Common section (`Select Node` → `Fallback`)
@@ -115,7 +115,7 @@ In the Bettbox build any group can be toggled off; the group is omitted and rule
 | `GitHub` | select | GitHub services (github.com / ghcr.io / npm / Copilot), upstream via `standardProxies` (Bettbox: falls back to Fallback) |
 | `Foreign Media` | select | Overseas streaming (YouTube / Netflix etc.), upstream via `standardProxies` |
 | `UHD` | select | uhdnow.com UHD streaming, upstream via `standardProxies` (Bettbox: falls back to Foreign Media) |
-| `Social Media` / `Telegram` / `Instagram` | select | Social media plus split-out TG/IG groups, upstream via `standardProxies` (Bettbox: TG/IG fall back to Social Media) |
+| `Social Media` / `Telegram` / `Instagram` / `VK` | select | Social media plus split-out TG/IG/VK groups, upstream via `standardProxies` (Bettbox: TG/IG/VK fall back to Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini etc., health-check `chatgpt.com` |
 | `OpenCode` | select | opencode CLI's own traffic (see below) |
 | `Microsoft Services` / `Apple Services` / `Steam` | select | Platform services, default DIRECT or proxy per service |

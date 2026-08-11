@@ -370,6 +370,12 @@ const ruleProviders = {
         "url":  `${bm7BaseUrl}/Instagram/Instagram.yaml`,
         "path": "./ruleset/bm7/instagram.yaml"
     },
+    // VK (VKontakte): Russian social platform ecosystem (social / video / VK Play games)
+    "vk": {
+        ...ruleProviderCommon,
+        "url":  `${bm7BaseUrl}/VK/VK.yaml`,
+        "path": "./ruleset/bm7/vk.yaml"
+    },
     "twitter": {
         ...ruleProviderCommon,
         "url":  `${bm7BaseUrl}/Twitter/Twitter.yaml`,
@@ -631,6 +637,14 @@ const rules = [
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,UHD",            // UHD streaming uses a dedicated group
     "DOMAIN,score-6j1.pages.dev,Select Node",
+    // ── VK → VK group (VK ecosystem domains missing from the BM7 VK rule set) ──
+    "DOMAIN-SUFFIX,vk.ru,VK",
+    "DOMAIN-SUFFIX,vkvideo.ru,VK",
+    "DOMAIN-SUFFIX,vk.me,VK",
+    "DOMAIN-SUFFIX,vk.link,VK",
+    "DOMAIN-SUFFIX,mycdn.me,VK",
+    "DOMAIN-SUFFIX,vkplay.ru,VK",
+    "DOMAIN-SUFFIX,vkplay.live,VK",
     // Apple services → Apple Services group
     // Streaming services like Apple Music require proxying;
     // do not switch to DIRECT.
@@ -658,6 +672,7 @@ const rules = [
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram uses a dedicated group
     "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram uses a dedicated group
+    "RULE-SET,vk,VK,no-resolve",               // VK uses a dedicated group
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -1013,6 +1028,21 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png"
+        },
+        /**
+         * VK - dedicated routing group for the Russian VKontakte ecosystem.
+         * Routed directly by RULE-SET,vk and the extra DOMAIN-SUFFIX rules;
+         * upstream is standardProxies.
+         * (Bettbox build: disabling this group falls back to Social Media.)
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name":    "VK",
+            "type":    "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://cdn.simpleicons.org/vk"
         },
         /**
          * AI Overseas — dedicated to ChatGPT / Gemini / etc.

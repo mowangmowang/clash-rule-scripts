@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   githubcopilot.com, atom.io and related domains. The Bettbox build
   exposes it as a visual toggle that falls back to `Fallback` when
   disabled.
+- `VK` proxy group (`select` type, `WARM` tier, upstream
+  `standardProxies`, placed immediately after `Instagram`). Wired to
+  the blackmatrix7 `VK.yaml` rule-set (vk.com, mvk.com, userapi.com,
+  vk-cdn.me, vk-cdn.net, vk-portal.net, vk.cc) plus explicit
+  `DOMAIN-SUFFIX` rules covering the rest of the VK ecosystem (vk.ru,
+  vkvideo.ru, vk.me, vk.link, mycdn.me, vkplay.ru, vkplay.live) —
+  social, video and VK Play gaming. `RULE-SET,vk` now targets the new
+  `VK` group. The Bettbox build exposes it as a visual toggle that
+  falls back to `Social Media` when disabled.
 
 ## Mobile release line
 

@@ -19,7 +19,7 @@
 - **一站式规则增强** — 注入 DNS、广告拦截、CN/境外分流、微软/苹果/谷歌等服务路由
 - **自适应地区分组** — 自动识别节点地区(HK/JP/US/SG/TW),非主流节点归属 Others 组统一调度
 - **OpenCode 专用组** — 为 opencode AI 编程代理的 Zen 网关流量提供独立策略控制
-- **Telegram / Instagram / UHD 专用分流** — Telegram、Instagram 从社交媒体拆出独立组,uhdnow.com 超高清流媒体独立调度
+- **Telegram / Instagram / UHD / VK 专用分流** — Telegram、Instagram 从社交媒体拆出独立组,uhdnow.com 超高清流媒体独立调度,VK 俄罗斯平台(社交/视频/游戏)全生态域名独立分流
 - **Bettbox 可视化开关** — 适配 Bettbox(FlClash core),面板勾选分组即可开关;关闭的组不生成,指向它的规则沿回退链自动回退
 - **桌面 + 移动同步维护** — 四套脚本各司其职,修改一只手同步
 
@@ -104,7 +104,7 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 ## 📊 代理组结构
 
 面板按「常用 / 不常用」两区显示,`Fallback` 是分界线。仅视觉聚合,引用关系不受影响。
-常用区顺序:`Select Node` → HK/JP/US → Google Services → GitHub → Foreign Media → UHD → Social Media → Telegram → Instagram → AI Overseas → OpenCode → Microsoft/Apple/Steam(仅桌面) → Fallback。
+常用区顺序:`Select Node` → HK/JP/US → Google Services → GitHub → Foreign Media → UHD → Social Media → Telegram → Instagram → VK → AI Overseas → OpenCode → Microsoft/Apple/Steam(仅桌面) → Fallback。
 Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它的规则沿 `serviceConfigs` 定义的回退链自动回退。
 
 ### 常用区(`Select Node` → `Fallback`)
@@ -117,7 +117,7 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 | `GitHub` | select | GitHub 系服务(github.com / ghcr.io / npm / Copilot 等),上游 `standardProxies`(Bettbox 关闭回退 Fallback) |
 | `Foreign Media` | select | 境外流媒体(YouTube / Netflix 等),上游为 `standardProxies` |
 | `UHD` | select | uhdnow.com 超高清流媒体专用,上游为 `standardProxies`(Bettbox 关闭回退 Foreign Media) |
-| `Social Media` / `Telegram` / `Instagram` | select | 社交媒体及拆分出的 TG/IG 专用组,上游为 `standardProxies`(Bettbox 关闭 TG/IG 回退 Social Media) |
+| `Social Media` / `Telegram` / `Instagram` / `VK` | select | 社交媒体及拆分出的 TG/IG/VK 专用组,上游为 `standardProxies`(Bettbox 关闭 TG/IG/VK 回退 Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini 等,健康检查 `chatgpt.com` |
 | `OpenCode` | select | opencode 命令行代理自有流量(见下) |
 | `Microsoft Services` / `Apple Services` / `Steam` | select | 平台服务,默认直连/代理因服务而异 |

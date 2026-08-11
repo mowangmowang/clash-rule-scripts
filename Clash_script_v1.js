@@ -315,6 +315,12 @@ const ruleProviders = {
         "url": `${bm7BaseUrl}/Instagram/Instagram.yaml`,
         "path": "./ruleset/bm7/instagram.yaml"
     },
+    // VK（VKontakte）：俄罗斯社交平台全生态（社交 / 视频 / VK Play 游戏）
+    "vk": {
+        ...ruleProviderCommon,
+        "url": `${bm7BaseUrl}/VK/VK.yaml`,
+        "path": "./ruleset/bm7/vk.yaml"
+    },
     "twitter": {
         ...ruleProviderCommon,
         "url": `${bm7BaseUrl}/Twitter/Twitter.yaml`,
@@ -556,6 +562,14 @@ const rules = [
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,UHD",            // 超高清流媒体走 UHD 专用组
     "DOMAIN,score-6j1.pages.dev,Select Node",
+    // ── VK → VK 组（BM7 VK 规则集未收录的 VK 生态域名：社交 / 视频 / 游戏全覆盖）──
+    "DOMAIN-SUFFIX,vk.ru,VK",
+    "DOMAIN-SUFFIX,vkvideo.ru,VK",
+    "DOMAIN-SUFFIX,vk.me,VK",
+    "DOMAIN-SUFFIX,vk.link,VK",
+    "DOMAIN-SUFFIX,mycdn.me,VK",
+    "DOMAIN-SUFFIX,vkplay.ru,VK",
+    "DOMAIN-SUFFIX,vkplay.live,VK",
     // Apple：强制走 Apple Services 组（流媒体如 Apple Music 需保持代理，勿切直连）
     "DOMAIN-SUFFIX,apple.com,Apple Services",
     "DOMAIN-SUFFIX,hjw01.com,Select Node",
@@ -580,6 +594,7 @@ const rules = [
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram 独立分流
     "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram 独立分流
+    "RULE-SET,vk,VK,no-resolve",               // VK 独立分流（社交 / 视频 / VK Play）
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
     "RULE-SET,discord,Social Media,no-resolve",
@@ -885,6 +900,20 @@ function main(config) {
             "proxies": standardProxies,
             "include-all": false,
             "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png"
+        },
+        /**
+         * VK：VK（VKontakte）俄罗斯社交平台全生态专用路由组
+         * 由 RULE-SET,vk 与补充 DOMAIN-SUFFIX 直连本组；上游为 standardProxies
+         * （Bettbox 版关闭本组时，规则回退到 Social Media）
+         */
+        {
+            ...groupBaseOption,
+            ...GROUP_TIERS.WARM,
+            "name": "VK",
+            "type": "select",
+            "proxies": standardProxies,
+            "include-all": false,
+            "icon": "https://cdn.simpleicons.org/vk"
         },
         /**
          * AI Overseas：专用于 ChatGPT / Gemini 等 AI 服务
