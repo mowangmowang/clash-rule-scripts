@@ -117,7 +117,7 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 | `GitHub` | select | GitHub 系服务(github.com / ghcr.io / npm / Copilot 等),上游 `standardProxies`(Bettbox 关闭回退 Fallback) |
 | `Foreign Media` | select | 境外流媒体(YouTube / Netflix 等),上游为 `standardProxies` |
 | `UHD` | select | uhdnow.com 超高清流媒体专用,上游为 `standardProxies`(Bettbox 关闭回退 Foreign Media) |
-| `Social Media` / `Telegram` / `Instagram` / `VK` | select | 社交媒体及拆分出的 TG/IG/VK 专用组,上游为 `standardProxies`(Bettbox 关闭 TG/IG/VK 回退 Social Media) |
+| `Social Media` / `Telegram` / `Instagram` / `VK` | select | 社交媒体及拆分出的 TG/IG/VK 专用组,上游为 `standardProxies`,VK 组测速目标 vk.com(Bettbox 关闭 TG/IG/VK 回退 Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini 等,健康检查 `chatgpt.com` |
 | `OpenCode` | select | opencode 命令行代理自有流量(见下) |
 | `Microsoft Services` / `Apple Services` / `Steam` | select | 平台服务,默认直连/代理因服务而异 |

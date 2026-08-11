@@ -115,7 +115,7 @@ In the Bettbox build any group can be toggled off; the group is omitted and rule
 | `GitHub` | select | GitHub services (github.com / ghcr.io / npm / Copilot), upstream via `standardProxies` (Bettbox: falls back to Fallback) |
 | `Foreign Media` | select | Overseas streaming (YouTube / Netflix etc.), upstream via `standardProxies` |
 | `UHD` | select | uhdnow.com UHD streaming, upstream via `standardProxies` (Bettbox: falls back to Foreign Media) |
-| `Social Media` / `Telegram` / `Instagram` / `VK` | select | Social media plus split-out TG/IG/VK groups, upstream via `standardProxies` (Bettbox: TG/IG/VK fall back to Social Media) |
+| `Social Media` / `Telegram` / `Instagram` / `VK` | select | Social media plus split-out TG/IG/VK groups, upstream via `standardProxies`; VK group health-check vk.com (Bettbox: TG/IG/VK fall back to Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini etc., health-check `chatgpt.com` |
 | `OpenCode` | select | opencode CLI's own traffic (see below) |
 | `Microsoft Services` / `Apple Services` / `Steam` | select | Platform services, default DIRECT or proxy per service |

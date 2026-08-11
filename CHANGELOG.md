@@ -27,6 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `VK` group. The Bettbox build exposes it as a visual toggle that
   falls back to `Social Media` when disabled.
 
+### Fixed
+
+- VK proxy group icon fetch: switched from `cdn.simpleicons.org` (its
+  official CDN is unreachable from mainland China, so the icon failed
+  to load) to the jsdelivr-hosted simple-icons VK brand icon
+  (`fastly.jsdelivr.net/npm/simple-icons@12/icons/vk.svg`, pinned to
+  v12).
+- VK proxy group health check: now uses `https://vk.com` with
+  `expected-status: 200` so the group latency reflects actual VK
+  reachability (mirroring the AI Overseas / OpenCode pattern); other
+  groups keep the default `gstatic generate_204` check.
+
 ## Mobile release line
 
 ### [mobile-v1.4] - 2026-08-04

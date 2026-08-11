@@ -904,16 +904,19 @@ function main(config) {
         /**
          * VK：VK（VKontakte）俄罗斯社交平台全生态专用路由组
          * 由 RULE-SET,vk 与补充 DOMAIN-SUFFIX 直连本组；上游为 standardProxies
+         * 健康检查用 vk.com，测速直接反映节点能否访问 VK
          * （Bettbox 版关闭本组时，规则回退到 Social Media）
          */
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
+            "url": "https://vk.com",
+            "expected-status": "200",
             "name": "VK",
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://cdn.simpleicons.org/vk"
+            "icon": "https://fastly.jsdelivr.net/npm/simple-icons@12/icons/vk.svg"
         },
         /**
          * AI Overseas：专用于 ChatGPT / Gemini 等 AI 服务

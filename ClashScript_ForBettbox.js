@@ -58,7 +58,7 @@ const serviceConfigs = [
     { name: "Others",          icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/flags/un.svg", fallback: "Select Node" },
     { name: "Telegram",        icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png", fallback: "Social Media" },
     { name: "Instagram",       icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Instagram.png", fallback: "Social Media" },
-    { name: "VK",              icon: "https://cdn.simpleicons.org/vk", fallback: "Social Media" },
+    { name: "VK",              icon: "https://fastly.jsdelivr.net/npm/simple-icons@12/icons/vk.svg", fallback: "Social Media" },
     { name: "UHD",             icon: "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ForeignMedia.png", fallback: "Foreign Media" },
     { name: "Google Services", icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/google.svg", fallback: "Fallback" },
     { name: "GitHub",          icon: "https://fastly.jsdelivr.net/gh/clash-verge-rev/clash-verge-rev.github.io@main/docs/assets/icons/github.svg", fallback: "Fallback" },
@@ -998,17 +998,20 @@ function main(config) {
         /**
          * VK - dedicated routing group for the Russian VKontakte ecosystem.
          * Routed directly by RULE-SET,vk and the extra DOMAIN-SUFFIX rules;
-         * upstream is standardProxies. Disabling this group falls back to
-         * Social Media.
+         * upstream is standardProxies. Health check uses vk.com so the
+         * group latency reflects real VK reachability. Disabling this
+         * group falls back to Social Media.
          */
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
+            "url": "https://vk.com",
+            "expected-status": "200",
             "name": "VK",
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://cdn.simpleicons.org/vk"
+            "icon": "https://fastly.jsdelivr.net/npm/simple-icons@12/icons/vk.svg"
         },
         /**
          * AI Overseas — dedicated to ChatGPT / Gemini / etc.

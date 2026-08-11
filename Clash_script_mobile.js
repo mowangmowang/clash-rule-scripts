@@ -813,15 +813,19 @@ function main(config) {
          * VK - dedicated routing group for the Russian VKontakte ecosystem.
          * Routed directly by RULE-SET,vk and the extra DOMAIN-SUFFIX rules;
          * upstream is standardProxies.
+         * Health check uses vk.com so the group latency reflects real VK
+         * reachability.
          */
         {
             ...groupBaseOption,
             ...GROUP_TIERS.WARM,
+            "url": "https://vk.com",
+            "expected-status": "200",
             "name": "VK",
             "type": "select",
             "proxies": standardProxies,
             "include-all": false,
-            "icon": "https://cdn.simpleicons.org/vk"
+            "icon": "https://fastly.jsdelivr.net/npm/simple-icons@12/icons/vk.svg"
         },
         /**
          * AI Overseas — dedicated to ChatGPT / Gemini / etc.
