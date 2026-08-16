@@ -2,8 +2,8 @@
 
 > Clash config preprocessing scripts — inject DNS, routing rules and proxy groups so fake-ip mode works flawlessly with Steam downloads and more.
 
-[![desktop-v1.4](https://img.shields.io/badge/desktop-v1.4-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4)
-[![mobile-v1.4](https://img.shields.io/badge/mobile-v1.4-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4)
+[![desktop-v1.5](https://img.shields.io/badge/desktop-v1.5-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5)
+[![mobile-v1.5](https://img.shields.io/badge/mobile-v1.5-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -15,8 +15,10 @@
 
 - **Steam download direct-connect** — full speed even under fake-ip, unaffected by proxy tunnel UDP loss
 - **All-in-one rule enhancement** — DNS injection, ad blocking, CN/overseas traffic split, Microsoft/Apple/Google routing
+- **Bing follows Microsoft group** — bing.com / bing.net / bingusercontent.com search and content domains follow the `Microsoft Services` group, switchable as a whole between DIRECT and proxy
 - **Adaptive regional grouping** — automatically detects proxy regions (HK/JP/US/SG/TW), non-mainstream nodes fall under `Others` for unified scheduling
 - **OpenCode dedicated group** — independent policy control for the opencode AI coding agent's Zen gateway traffic
+- **GitHub dedicated routing** — GitHub ecosystem (github.com / ghcr.io / npm / Copilot, etc.) gets its own group, upstream via `standardProxies`
 - **Dedicated Telegram / Instagram / UHD / VK groups** — Telegram and Instagram split out from Social Media; uhdnow.com UHD streaming gets its own group; all VK ecosystem domains (social / video / VK Play) get dedicated routing
 - **Bettbox visual toggles** — Bettbox (FlClash core) build with per-group switches; disabled groups are not generated and rules targeting them fall back along a chain
 - **Desktop + mobile synced maintenance** — four scripts, one change set
@@ -48,10 +50,10 @@ https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script
 https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
 ```
 
-**Pin a version (replace `@main` with a tag such as `@desktop-v1.4` to opt out of auto-updates):**
+**Pin a version (replace `@main` with a tag such as `@desktop-v1.5` to opt out of auto-updates):**
 
 ```txt
-https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.4/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.5/Clash_script_v1.js
 ```
 
 **GitHub raw link (fallback if the CDN is unavailable):**
@@ -118,7 +120,7 @@ In the Bettbox build any group can be toggled off; the group is omitted and rule
 | `Social Media` / `Telegram` / `Instagram` / `VK` | select | Social media plus split-out TG/IG/VK groups, upstream via `standardProxies`; VK group health-check vk.com (Bettbox: TG/IG/VK fall back to Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini etc., health-check `chatgpt.com` |
 | `OpenCode` | select | opencode CLI's own traffic (see below) |
-| `Microsoft Services` / `Apple Services` / `Steam` | select | Platform services, default DIRECT or proxy per service |
+| `Microsoft Services` / `Apple Services` / `Steam` | select | Platform services, default DIRECT or proxy per service; Bing domains follow the Microsoft group |
 | `Fallback` | select | Catch-all group for unmatched traffic |
 
 ### Uncommon section (after `Fallback`)

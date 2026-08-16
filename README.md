@@ -2,8 +2,8 @@
 
 > Clash 配置预处理脚本 · 自动增强 DNS / 路由 / 代理组,让 fake-ip 模式也能稳跑 Steam 等下载。
 
-[![desktop-v1.4](https://img.shields.io/badge/desktop-v1.4-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4)
-[![mobile-v1.4](https://img.shields.io/badge/mobile-v1.4-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4)
+[![desktop-v1.5](https://img.shields.io/badge/desktop-v1.5-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5)
+[![mobile-v1.5](https://img.shields.io/badge/mobile-v1.5-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -17,8 +17,10 @@
 
 - **Steam 下载直连** — fake-ip 模式下也满速,不受代理隧道 UDP 损耗影响
 - **一站式规则增强** — 注入 DNS、广告拦截、CN/境外分流、微软/苹果/谷歌等服务路由
+- **Bing 归入微软分组** — bing.com / bing.net / bingusercontent.com 等搜索与内容域名跟随 `Microsoft Services` 组,面板可整体在直连/代理间切换
 - **自适应地区分组** — 自动识别节点地区(HK/JP/US/SG/TW),非主流节点归属 Others 组统一调度
 - **OpenCode 专用组** — 为 opencode AI 编程代理的 Zen 网关流量提供独立策略控制
+- **GitHub 独立分流** — GitHub 系服务(github.com / ghcr.io / npm / Copilot 等)独立分组调度,上游为 `standardProxies`
 - **Telegram / Instagram / UHD / VK 专用分流** — Telegram、Instagram 从社交媒体拆出独立组,uhdnow.com 超高清流媒体独立调度,VK 俄罗斯平台(社交/视频/游戏)全生态域名独立分流
 - **Bettbox 可视化开关** — 适配 Bettbox(FlClash core),面板勾选分组即可开关;关闭的组不生成,指向它的规则沿回退链自动回退
 - **桌面 + 移动同步维护** — 四套脚本各司其职,修改一只手同步
@@ -50,10 +52,10 @@ https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script
 https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
 ```
 
-**锁定版本(把 `@main` 换成 tag,如 `@desktop-v1.4`,避免自动更新):**
+**锁定版本(把 `@main` 换成 tag,如 `@desktop-v1.5`,避免自动更新):**
 
 ```txt
-https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.4/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.5/Clash_script_v1.js
 ```
 
 **GitHub 原始链接(CDN 不可用时备用):**
@@ -120,7 +122,7 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 | `Social Media` / `Telegram` / `Instagram` / `VK` | select | 社交媒体及拆分出的 TG/IG/VK 专用组,上游为 `standardProxies`,VK 组测速目标 vk.com(Bettbox 关闭 TG/IG/VK 回退 Social Media) |
 | `AI Overseas` | select | ChatGPT / Gemini 等,健康检查 `chatgpt.com` |
 | `OpenCode` | select | opencode 命令行代理自有流量(见下) |
-| `Microsoft Services` / `Apple Services` / `Steam` | select | 平台服务,默认直连/代理因服务而异 |
+| `Microsoft Services` / `Apple Services` / `Steam` | select | 平台服务,默认直连/代理因服务而异;Microsoft 组含 Bing 域名 |
 | `Fallback` | select | 兜底组,未被规则命中的流量最终落点 |
 
 ### 不常用区(`Fallback` 之后)
