@@ -8,14 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Mobile release line
+
+### [mobile-v1.5] - 2026-08-16
+
 ### Added
 
-- Bing domains (`bing.com`, `bing.net`, `bingusercontent.com`) are
-  now explicitly routed to the `Microsoft Services` proxy group, so
-  Bing traffic follows the same policy as other Microsoft traffic
-  (switchable from DIRECT to proxy via the panel). Copilot backend
-  endpoints (`edgeservices.bing.com` / `sydney.bing.com`) remain on
-  `AI Overseas`.
 - `GitHub` proxy group (`select` type, `WARM` tier, upstream
   `standardProxies`, placed immediately after `Google Services`).
   Wired to the blackmatrix7 `GitHub.yaml` rule-set, covering
@@ -32,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   social, video and VK Play gaming. `RULE-SET,vk` now targets the new
   `VK` group. The Bettbox build exposes it as a visual toggle that
   falls back to `Social Media` when disabled.
+- Bing domains (`bing.com`, `bing.net`, `bingusercontent.com`) are
+  now explicitly routed to the `Microsoft Services` proxy group, so
+  Bing traffic follows the same policy as other Microsoft traffic
+  (switchable from DIRECT to proxy via the panel). Copilot backend
+  endpoints (`edgeservices.bing.com` / `sydney.bing.com`) remain on
+  `AI Overseas`.
 
 ### Fixed
 
@@ -44,8 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `expected-status: 200` so the group latency reflects actual VK
   reachability (mirroring the AI Overseas / OpenCode pattern); other
   groups keep the default `gstatic generate_204` check.
-
-## Mobile release line
 
 ### [mobile-v1.4] - 2026-08-04
 
@@ -199,6 +201,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > into parity.
 
 ## Desktop release line
+
+### [desktop-v1.5] - 2026-08-16
+
+### Added
+
+- `GitHub` proxy group (`select` type, `WARM` tier, upstream
+  `standardProxies`, placed immediately after `Google Services`).
+  Wired to the blackmatrix7 `GitHub.yaml` rule-set, covering
+  github.com, githubusercontent.com, ghcr.io, npmjs.com,
+  githubcopilot.com, atom.io and related domains. The Bettbox build
+  exposes it as a visual toggle that falls back to `Fallback` when
+  disabled.
+- `VK` proxy group (`select` type, `WARM` tier, upstream
+  `standardProxies`, placed immediately after `Instagram`). Wired to
+  the blackmatrix7 `VK.yaml` rule-set (vk.com, mvk.com, userapi.com,
+  vk-cdn.me, vk-cdn.net, vk-portal.net, vk.cc) plus explicit
+  `DOMAIN-SUFFIX` rules covering the rest of the VK ecosystem (vk.ru,
+  vkvideo.ru, vk.me, vk.link, mycdn.me, vkplay.ru, vkplay.live) —
+  social, video and VK Play gaming. `RULE-SET,vk` now targets the new
+  `VK` group. The Bettbox build exposes it as a visual toggle that
+  falls back to `Social Media` when disabled.
+- Bing domains (`bing.com`, `bing.net`, `bingusercontent.com`) are
+  now explicitly routed to the `Microsoft Services` proxy group, so
+  Bing traffic follows the same policy as other Microsoft traffic
+  (switchable from DIRECT to proxy via the panel). Copilot backend
+  endpoints (`edgeservices.bing.com` / `sydney.bing.com`) remain on
+  `AI Overseas`.
+
+### Fixed
+
+- VK proxy group icon fetch: switched from `cdn.simpleicons.org` (its
+  official CDN is unreachable from mainland China, so the icon failed
+  to load) to the jsdelivr-hosted simple-icons VK brand icon
+  (`fastly.jsdelivr.net/npm/simple-icons@12/icons/vk.svg`, pinned to
+  v12).
+- VK proxy group health check: now uses `https://vk.com` with
+  `expected-status: 200` so the group latency reflects actual VK
+  reachability (mirroring the AI Overseas / OpenCode pattern); other
+  groups keep the default `gstatic generate_204` check.
 
 ### [desktop-v1.4] - 2026-08-04
 
@@ -381,12 +422,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
   blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`.
 
-[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.4...HEAD
+[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.5...HEAD
+[mobile-v1.5]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5
 [mobile-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4
 [mobile-v1.3]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.3
 [mobile-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.2
 [mobile-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.1
 [mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[desktop-v1.5]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5
 [desktop-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4
 [desktop-v1.3]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.3
 [desktop-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.2
