@@ -551,6 +551,11 @@ const rules = [
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
+    // ── Bing → Microsoft Services（与微软流量同组，面板可统一切换）────
+    // 注意：edgeservices.bing.com / sydney.bing.com 已在上方交给 AI Overseas（Copilot）。
+    "DOMAIN-SUFFIX,bing.com,Microsoft Services",
+    "DOMAIN-SUFFIX,bing.net,Microsoft Services",
+    "DOMAIN-SUFFIX,bingusercontent.com,Microsoft Services",
     // ── OpenCode → OpenCode 组（Zen 网关 / 登录 / 分享 / 文档）──────────
     // opencode.ai 承载 OpenCode Zen API 网关、OAuth 登录、会话分享与文档站，
     // 是 opencode 自有流量的统一入口。anoma.ly 为其母公司域（账单/帮助站）。

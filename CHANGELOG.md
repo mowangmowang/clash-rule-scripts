@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Bing domains (`bing.com`, `bing.net`, `bingusercontent.com`) are
+  now explicitly routed to the `Microsoft Services` proxy group, so
+  Bing traffic follows the same policy as other Microsoft traffic
+  (switchable from DIRECT to proxy via the panel). Copilot backend
+  endpoints (`edgeservices.bing.com` / `sydney.bing.com`) remain on
+  `AI Overseas`.
 - `GitHub` proxy group (`select` type, `WARM` tier, upstream
   `standardProxies`, placed immediately after `Google Services`).
   Wired to the blackmatrix7 `GitHub.yaml` rule-set, covering

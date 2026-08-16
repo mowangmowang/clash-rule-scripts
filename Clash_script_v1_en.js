@@ -622,6 +622,12 @@ const rules = [
     "DOMAIN-SUFFIX,edgeservices.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,sydney.bing.com,AI Overseas",
     "DOMAIN-SUFFIX,api.copilot.microsoft.com,AI Overseas",
+    // ── Bing → Microsoft Services (same group as Microsoft traffic) ────
+    // NOTE: edgeservices.bing.com / sydney.bing.com are already routed to
+    // AI Overseas above (Copilot backend).
+    "DOMAIN-SUFFIX,bing.com,Microsoft Services",
+    "DOMAIN-SUFFIX,bing.net,Microsoft Services",
+    "DOMAIN-SUFFIX,bingusercontent.com,Microsoft Services",
     // ── OpenCode → OpenCode group (Zen gateway / auth / share / docs) ──────
     // opencode.ai hosts the OpenCode Zen API gateway, OAuth login,
     // session sharing endpoints and the documentation site — it is the
