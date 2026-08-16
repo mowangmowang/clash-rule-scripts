@@ -1,8 +1,8 @@
 /**
  * Clash Verge Rev - 主配置脚本 (main.js)
  *
- * @version 1.4
- * @date 2026-08-04
+ * @version 1.5
+ * @date 2026-08-16
  * @description 为 Clash Verge Rev 注入 DNS、路由规则与代理组，实现 Steam 直连、Microsoft 服务支持、广告拦截、地域分流，以及 Telegram / Instagram / UHD 专用分组。
  * 【工作原理】
  * 本文件是一个 JavaScript 预处理脚本，由 Clash Verge Rev 的「配置预处理」功能调用。

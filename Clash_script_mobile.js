@@ -1,8 +1,8 @@
 /**
  * Clash Meta Mobile - Configuration Script (main.js)
  *
- * @version     1.4
- * @date        2026-08-04
+ * @version     1.5
+ * @date        2026-08-16
  * @target      Clash Meta for Android (2.11+), Stash (iOS)
  * @description Injects DNS, routing rules, proxy groups and regional
  *              auto-grouping into the upstream subscription config,

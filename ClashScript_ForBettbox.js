@@ -1,10 +1,10 @@
 /**
  * ClashScript for Bettbox - Configuration Script
  *
- * @version     1.4
- * @date        2026-08-04
+ * @version     1.5
+ * @date        2026-08-16
  * @target      Bettbox (FlClash core), Clash Meta for Android, Stash
- * @basedon     Clash_script_mobile.js v1.4
+ * @basedon     Clash_script_mobile.js v1.5
  *
  * When a group is disabled, the group is not generated and rules targeting
  * it are rewritten through the fallback chain defined in serviceConfigs.
