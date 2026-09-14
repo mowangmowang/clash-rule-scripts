@@ -567,6 +567,7 @@ const rules = [
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,UHD",            // 超高清流媒体走 UHD 专用组
     "DOMAIN,score-6j1.pages.dev,Select Node",
+    "DOMAIN-SUFFIX,spanishdict.com,Select Node",
     // ── VK → VK 组（BM7 VK 规则集未收录的 VK 生态域名：社交 / 视频 / 游戏全覆盖）──
     "DOMAIN-SUFFIX,vk.ru,VK",
     "DOMAIN-SUFFIX,vkvideo.ru,VK",

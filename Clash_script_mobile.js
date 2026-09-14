@@ -453,6 +453,7 @@ const rules = [
     "DOMAIN-SUFFIX,lyun.edu.cn,DIRECT",
     "DOMAIN-SUFFIX,uhdnow.com,UHD",            // UHD streaming uses a dedicated group
     "DOMAIN,score-6j1.pages.dev,Select Node",
+    "DOMAIN-SUFFIX,spanishdict.com,Select Node",
     // ── VK → VK group (VK ecosystem domains missing from the BM7 VK rule set) ──
     "DOMAIN-SUFFIX,vk.ru,VK",
     "DOMAIN-SUFFIX,vkvideo.ru,VK",
