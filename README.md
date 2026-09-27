@@ -2,8 +2,8 @@
 
 > Clash 配置预处理脚本 · 自动增强 DNS / 路由 / 代理组,让 fake-ip 模式也能稳跑 Steam 等下载。
 
-[![desktop-v1.5](https://img.shields.io/badge/desktop-v1.5-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5)
-[![mobile-v1.5](https://img.shields.io/badge/mobile-v1.5-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5)
+[![desktop-v1.6](https://img.shields.io/badge/desktop-v1.6-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.6)
+[![mobile-v1.6](https://img.shields.io/badge/mobile-v1.6-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.6)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -52,10 +52,10 @@ https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script
 https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
 ```
 
-**锁定版本(把 `@main` 换成 tag,如 `@desktop-v1.5`,避免自动更新):**
+**锁定版本(把 `@main` 换成 tag,如 `@desktop-v1.6`,避免自动更新):**
 
 ```txt
-https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.5/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.6/Clash_script_v1.js
 ```
 
 **GitHub 原始链接(CDN 不可用时备用):**

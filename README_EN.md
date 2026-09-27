@@ -2,8 +2,8 @@
 
 > Clash config preprocessing scripts — inject DNS, routing rules and proxy groups so fake-ip mode works flawlessly with Steam downloads and more.
 
-[![desktop-v1.5](https://img.shields.io/badge/desktop-v1.5-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5)
-[![mobile-v1.5](https://img.shields.io/badge/mobile-v1.5-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5)
+[![desktop-v1.6](https://img.shields.io/badge/desktop-v1.6-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.6)
+[![mobile-v1.6](https://img.shields.io/badge/mobile-v1.6-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.6)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -50,10 +50,10 @@ https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script
 https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
 ```
 
-**Pin a version (replace `@main` with a tag such as `@desktop-v1.5` to opt out of auto-updates):**
+**Pin a version (replace `@main` with a tag such as `@desktop-v1.6` to opt out of auto-updates):**
 
 ```txt
-https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.5/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.6/Clash_script_v1.js
 ```
 
 **GitHub raw link (fallback if the CDN is unavailable):**
