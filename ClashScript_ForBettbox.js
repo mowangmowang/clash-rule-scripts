@@ -349,7 +349,7 @@ const ruleProviders = {
     },
     "whatsapp": {
         ...ruleProviderCommon,
-        "url": `${bm7BaseUrl}/WhatsApp/WhatsApp.yaml`,
+        "url": `${bm7BaseUrl}/Whatsapp/Whatsapp.yaml`,
         "path": "./ruleset/bm7/whatsapp.yaml"
     },
     "discord": {

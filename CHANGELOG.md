@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Corrected the blackmatrix7 Whatsapp rule-provider URL in all four scripts
+  (`Whatsapp/Whatsapp.yaml`) to prevent a 404 during provider initialization.
+
 ## Mobile release line
 
 ### [mobile-v1.5] - 2026-08-16
