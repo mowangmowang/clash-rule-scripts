@@ -8,12 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Mobile release line
+
+### [mobile-v1.6] - 2026-09-28
+
+### Added
+
+- Route `spanishdict.com` and its subdomains through `Select Node` in the
+  mobile and Bettbox scripts.
+
 ### Fixed
 
-- Corrected the blackmatrix7 Whatsapp rule-provider URL in all four scripts
-  (`Whatsapp/Whatsapp.yaml`) to prevent a 404 during provider initialization.
-
-## Mobile release line
+- Correct the blackmatrix7 Whatsapp rule-provider URL to
+  `Whatsapp/Whatsapp.yaml`, preventing a 404 during initialization.
 
 ### [mobile-v1.5] - 2026-08-16
 
@@ -206,6 +213,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > into parity.
 
 ## Desktop release line
+
+### [desktop-v1.6] - 2026-09-28
+
+### Added
+
+- Route `spanishdict.com` and its subdomains through `Select Node` in both
+  desktop scripts.
+
+### Fixed
+
+- Correct the blackmatrix7 Whatsapp rule-provider URL to
+  `Whatsapp/Whatsapp.yaml`, preventing a 404 during initialization.
 
 ### [desktop-v1.5] - 2026-08-16
 
@@ -427,13 +446,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
   blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`.
 
-[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.5...HEAD
+[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.6...HEAD
+[mobile-v1.6]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.6
 [mobile-v1.5]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5
 [mobile-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4
 [mobile-v1.3]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.3
 [mobile-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.2
 [mobile-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.1
 [mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[desktop-v1.6]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.6
 [desktop-v1.5]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5
 [desktop-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4
 [desktop-v1.3]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.3
