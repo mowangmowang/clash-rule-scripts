@@ -6,7 +6,7 @@
   },
   "providers": {
     "advertising": { "source": "blackmatrix7", "path": "rule/Clash/Advertising/Advertising.yaml", "behavior": "classical", "payload": ["DOMAIN-KEYWORD,caclick.baidu.com", "DOMAIN-KEYWORD,mobads.baidu.com", "DOMAIN-KEYWORD,kepler.jd.com"] },
-    "privacy": { "source": "blackmatrix7", "path": "rule/Clash/Privacy/Privacy.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,app-measurement.com"] },
+    "privacy": { "source": "blackmatrix7", "path": "rule/Clash/Privacy/Privacy.yaml", "behavior": "classical", "payload": ["DOMAIN-KEYWORD,analytics."] },
     "facebook": { "source": "blackmatrix7", "path": "rule/Clash/Facebook/Facebook.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,instagram.com", "DOMAIN-SUFFIX,cdninstagram.com", "DOMAIN-SUFFIX,instagr.am"] },
     "instagram": { "source": "blackmatrix7", "path": "rule/Clash/Instagram/Instagram.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,instagram.com", "DOMAIN-SUFFIX,cdninstagram.com", "DOMAIN-SUFFIX,instagr.am"] },
     "microsoft": { "source": "blackmatrix7", "path": "rule/Clash/Microsoft/Microsoft.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,1drv.ms", "DOMAIN-SUFFIX,aka.ms"] },
