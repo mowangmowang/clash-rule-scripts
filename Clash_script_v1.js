@@ -55,7 +55,7 @@ const DNS_LISTEN = "0.0.0.0:1053";
 // 【2026-06-09 修复】Windows Web 端 Apple Music 报 ERR_CONNECTION_CLOSED：
 // 浏览器对 *.apple.com 同时发起 A + AAAA 解析，Akamai v6 边缘对 chunk 请求经常 RST，
 // 表现即 ERR_CONNECTION_CLOSED。Mobile 脚本已强制 v4-only，对齐之。
-const DISABLE_IPV6 = true;
+const ENABLE_IPV6 = false; // Enable only on networks with working IPv6.
 
 const dnsConfig = {
     "enable": true,
@@ -65,9 +65,9 @@ const dnsConfig = {
      * 【关键】禁用 IPv6
      * 原因：部分网络环境 IPv6 路由不稳定，会导致连接超时或失败。
      * Steam、Apple 等服务在双栈环境下可能优先尝试 IPv6 而失败。
-     * 注意：纯 IPv6 网络环境需改为 true，否则 DNS 完全不可用。
+     * 需要 IPv6 的网络可将 ENABLE_IPV6 设为 true；同时控制 DNS 和顶层开关。
      */
-    "ipv6": DISABLE_IPV6,
+    "ipv6": ENABLE_IPV6,
 
     "use-system-hosts": false,
     "cache-algorithm": "arc",
@@ -707,14 +707,23 @@ function main(config) {
 
     // 用本脚本的 DNS 配置完整覆盖订阅源的 DNS 设置
     config["dns"] = dnsConfig;
+    config["ipv6"] = ENABLE_IPV6;
 
     // 【新增】开启 sniffer 域名嗅探
-    // 解决浏览器开启安全 DNS (DoH) 时，Clash 只能获取到目标 IP 而无法匹配 DOMAIN 规则的问题
+    // 恢复纯 IP 流量的 HTTP Host / 普通 TLS SNI；不能解密 ECH。
     // 【注意】保留 msftconnecttest.com 是为了防止 Windows NCSI 因 fake-ip 异常。
     // microsoft.com 已移除：Store 用 WebView 渲染，skip 会阻止 sniffer 识别真实 SNI 域名，
     // 导致 DOMAIN 规则无法正确匹配。msftncsi.com 仍在 fake-ip-filter 中保护 NCSI。
     config["sniffer"] = {
         "enable": true,
+        "force-dns-mapping": true,
+        "parse-pure-ip": true,
+        "override-destination": false,
+        "sniff": {
+            "HTTP": { "ports": [80, "8080-8880"] },
+            "TLS": { "ports": [443, 8443] },
+            "QUIC": { "ports": [443, 8443] }
+        },
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",

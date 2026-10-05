@@ -73,7 +73,7 @@ const DNS_LISTEN   = "0.0.0.0:1053";
 // browsers issue A + AAAA in parallel for *.apple.com; Akamai v6 edges
 // frequently RST chunk requests, surfacing as ERR_CONNECTION_CLOSED.
 // Mobile script already forces v4-only — align the desktop script.
-const DISABLE_IPV6 = true;
+const ENABLE_IPV6 = false; // Enable only on networks with working IPv6.
 
 const dnsConfig = {
     "enable": true,
@@ -85,10 +85,9 @@ const dnsConfig = {
      * IPv6 routing is unreliable on many networks, causing
      * connection timeouts or outright failures.  Dual-stack
      * services (Steam, Apple, etc.) may prefer IPv6 and fail
-     * silently.  Set DISABLE_IPV6 to true on IPv6-only
-     * networks or DNS breaks entirely.
+     * silently. Set ENABLE_IPV6 to true when IPv6 is required and working.
      */
-    "ipv6": DISABLE_IPV6,
+    "ipv6": ENABLE_IPV6,
 
     "use-system-hosts": false,
     "cache-algorithm":  "arc",
@@ -798,6 +797,7 @@ function main(config) {
 
     // Fully replace the subscription's DNS settings with ours.
     config["dns"] = dnsConfig;
+    config["ipv6"] = ENABLE_IPV6;
 
     /**
      * Enable the domain sniffer.
@@ -805,7 +805,7 @@ function main(config) {
      * When a browser enables Secure DNS (DoH), Clash only sees the
      * resolved IP and cannot match DOMAIN rules.  The sniffer
      * inspects TLS SNI / HTTP Host headers to recover the true
-     * domain name.
+     * domain name. Encrypted ClientHello (ECH) cannot be decrypted.
      *
      * msftconnecttest.com is kept in skip-domain to prevent Windows NCSI
      * from breaking due to fake-ip.  microsoft.com has been removed because
@@ -815,6 +815,14 @@ function main(config) {
      */
     config["sniffer"] = {
         "enable":       true,
+        "force-dns-mapping": true,
+        "parse-pure-ip": true,
+        "override-destination": false,
+        "sniff": {
+            "HTTP": { "ports": [80, "8080-8880"] },
+            "TLS": { "ports": [443, 8443] },
+            "QUIC": { "ports": [443, 8443] }
+        },
         "force-domain": ["+.*"],
         "skip-domain":  [
             "+.mijia.cloud",

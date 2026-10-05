@@ -113,7 +113,7 @@ const foreignNameservers = [
 // ============================================================
 
 const DNS_LISTEN = "0.0.0.0:1053";
-const DISABLE_IPV6 = true;  // Mobile: carrier IPv6 is frequently broken
+const ENABLE_IPV6 = false; // Enable only on networks with working IPv6.
 
 const dnsConfig = {
     "enable": true,
@@ -121,11 +121,10 @@ const dnsConfig = {
 
     /**
      * 【Mobile】IPv6 disabled.
-     * Many Chinese cellular carriers have broken IPv6 routing, causing
-     * connection timeouts.  On pure-IPv6 networks this must be set to
-     * true, otherwise DNS becomes completely unavailable.
+     * IPv6 defaults off to avoid failures on networks with broken IPv6 routing.
+     * Set ENABLE_IPV6 to true when IPv6 is required and working.
      */
-    "ipv6": DISABLE_IPV6,
+    "ipv6": ENABLE_IPV6,
 
     "use-system-hosts": false,
     "cache-algorithm": "arc",
@@ -752,19 +751,27 @@ function main(config) {
 
     // Override the subscription DNS config with our own.
     config["dns"] = dnsConfig;
+    config["ipv6"] = ENABLE_IPV6;
 
     /**
      * Enable domain sniffing.
      *
-     * Without sniffing, Clash only sees destination IPs when the browser
-     * or app uses HTTPS with encrypted SNI.  This prevents DOMAIN-based
-     * rule matching.
+     * Recover HTTP Host and ordinary TLS SNI for IP-only traffic.
+     * Encrypted ClientHello (ECH) cannot be decrypted by the sniffer.
      *
      * skip-domain entries prevent sniffing from interfering with
      * critical system-level connectivity checks on mobile OSes.
      */
     config["sniffer"] = {
         "enable": true,
+        "force-dns-mapping": true,
+        "parse-pure-ip": true,
+        "override-destination": false,
+        "sniff": {
+            "HTTP": { "ports": [80, "8080-8880"] },
+            "TLS": { "ports": [443, 8443] },
+            "QUIC": { "ports": [443, 8443] }
+        },
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",               // Xiaomi smart home
