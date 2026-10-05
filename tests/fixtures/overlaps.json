@@ -1,0 +1,15 @@
+{
+  "description": "Minimal unmodified upstream rule entries used to reproduce precedence errors. Not complete upstream rule sets.",
+  "sources": {
+    "blackmatrix7": { "repository": "blackmatrix7/ios_rule_script", "commit": "5a61490ab88ddaff4e9dbd7740b881d75157a49f" },
+    "loyalsoldier": { "repository": "Loyalsoldier/clash-rules", "commit": "d282e2e44d2c71f562d56276dc4aa603a8b110f8" }
+  },
+  "providers": {
+    "advertising": { "source": "blackmatrix7", "path": "rule/Clash/Advertising/Advertising.yaml", "behavior": "classical", "payload": ["DOMAIN-KEYWORD,caclick.baidu.com", "DOMAIN-KEYWORD,mobads.baidu.com", "DOMAIN-KEYWORD,kepler.jd.com"] },
+    "privacy": { "source": "blackmatrix7", "path": "rule/Clash/Privacy/Privacy.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,app-measurement.com"] },
+    "facebook": { "source": "blackmatrix7", "path": "rule/Clash/Facebook/Facebook.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,instagram.com", "DOMAIN-SUFFIX,cdninstagram.com", "DOMAIN-SUFFIX,instagr.am"] },
+    "instagram": { "source": "blackmatrix7", "path": "rule/Clash/Instagram/Instagram.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,instagram.com", "DOMAIN-SUFFIX,cdninstagram.com", "DOMAIN-SUFFIX,instagr.am"] },
+    "microsoft": { "source": "blackmatrix7", "path": "rule/Clash/Microsoft/Microsoft.yaml", "behavior": "classical", "payload": ["DOMAIN-SUFFIX,1drv.ms", "DOMAIN-SUFFIX,aka.ms"] },
+    "proxy": { "source": "loyalsoldier", "path": "proxy.txt", "behavior": "domain", "payload": ["+.1drv.ms", "+.aka.ms", "+.instagram.com"] }
+  }
+}
