@@ -528,7 +528,7 @@ const rules = [
     // 需 TUN 模式 + find-process-mode: strict（Clash Meta/Mihomo 默认 strict）。
     "PROCESS-NAME,WinStore.App.exe,DIRECT",
     "PROCESS-NAME,Microsoft.StorePurchaseApp.exe,DIRECT",
-    "PROCESS-NAME,Microsoft.WindowsStore*,DIRECT",
+    "PROCESS-NAME-REGEX,(?i)^Microsoft\\.WindowsStore.*$,DIRECT",
     // ── Microsoft Store / winget CDN → DIRECT ─────────────────────────────
     // 【必读】TUN 模式 + UWP 流程：
     // 1) 开启 Clash Verge Rev 的 TUN 模式（设置 → TUN 模式 → 开启）
@@ -689,26 +689,68 @@ const GROUP_TIERS = {
 // ============================================================
 // § 6. 程序入口 - 配置组装
 // ============================================================
-function main(config) {
-    // 浅拷贝输入，避免原地修改污染调用方持有的引用
-    config = {
-        ...config,
-        "proxies": [...(config?.proxies || [])],
-        "proxy-groups": [...(config?.["proxy-groups"] || [])]
-    };
+// Copy JSON-like configuration data without sharing mutable caller/template objects.
+function copyConfigData(value, seen = new Map()) {
+    if (value === null || typeof value !== "object") return value;
+    if (seen.has(value)) return seen.get(value);
+    const result = Array.isArray(value) ? [] : {};
+    seen.set(value, result);
+    for (const key of Object.keys(value)) {
+        Object.defineProperty(result, key, {
+            value: copyConfigData(value[key], seen), enumerable: true,
+            writable: true, configurable: true
+        });
+    }
+    return result;
+}
 
-    // 安全检查：确保订阅源中有可用节点
-    const proxyCount = config?.proxies?.length ?? 0;
-    const proxyProviderCount =
-        typeof config?.["proxy-providers"] === "object"
-            ? Object.keys(config["proxy-providers"]).length
-            : 0;
-    if (proxyCount === 0 && proxyProviderCount === 0) {
+function prepareConfig(config) {
+    if (!config || typeof config !== "object" || Array.isArray(config)) {
+        throw new Error("Configuration must be a non-null object");
+    }
+    const proxies = config.proxies == null ? [] : config.proxies;
+    if (!Array.isArray(proxies)) throw new Error("proxies must be an array");
+    const providers = config["proxy-providers"] == null ? {} : config["proxy-providers"];
+    if (typeof providers !== "object" || Array.isArray(providers)) {
+        throw new Error("proxy-providers must be an object");
+    }
+    for (const name of Object.keys(providers)) {
+        const provider = providers[name];
+        if (!name.trim() || !provider || typeof provider !== "object" || Array.isArray(provider)) {
+            throw new Error("Invalid proxy-provider definition: " + name);
+        }
+    }
+    const reserved = new Set([
+        "DIRECT", "REJECT", "REJECT-DROP", "PASS", "COMPATIBLE", "GLOBAL",
+        "Select Node", "Fallback", "Others", "HK - 香港", "JP - 日本",
+        "US - 美国", "SG - 新加坡", "TW - 台湾", "Latency Test", "Failover",
+        "Load Balance (Hash)", "Load Balance (Round Robin)", "Google Services",
+        "GitHub", "Foreign Media", "UHD", "Social Media", "Telegram", "Instagram",
+        "VK", "AI Overseas", "OpenCode", "Microsoft Services", "Apple Services",
+        "Steam", "Ad Block", "Global Block"
+    ]);
+    const names = new Set();
+    for (const proxy of proxies) {
+        if (!proxy || typeof proxy !== "object" || Array.isArray(proxy) ||
+            typeof proxy.name !== "string" || !proxy.name.trim()) {
+            throw new Error("Each proxy must have a non-empty string name");
+        }
+        if (names.has(proxy.name)) throw new Error("Duplicate proxy name: " + proxy.name);
+        if (reserved.has(proxy.name)) throw new Error("Proxy name conflicts with a reserved target: " + proxy.name);
+        names.add(proxy.name);
+    }
+    if (proxies.length === 0 && Object.keys(providers).length === 0) {
         throw new Error("No proxies found in configuration file");
     }
+    return { ...config, "proxies": copyConfigData(proxies), "proxy-providers": copyConfigData(providers) };
+}
+
+function main(config) {
+    config = prepareConfig(config);
+
 
     // 用本脚本的 DNS 配置完整覆盖订阅源的 DNS 设置
-    config["dns"] = dnsConfig;
+    config["dns"] = copyConfigData(dnsConfig);
     config["ipv6"] = ENABLE_IPV6;
 
     // 【新增】开启 sniffer 域名嗅探
@@ -1125,9 +1167,12 @@ function main(config) {
 
 
     // 将规则集和规则写入配置，覆盖订阅源原有的规则
-    config["rule-providers"] = ruleProviders;
-    config["rules"] = rules;
+    config["rule-providers"] = copyConfigData(ruleProviders);
+    config["rules"] = [...rules];
 
     // 返回最终配置，Clash Verge Rev 将使用此配置启动
+    // Each generated group owns its arrays independently.
+    config["proxy-groups"] = config["proxy-groups"].map(group => copyConfigData(group));
+
     return config;
 }
