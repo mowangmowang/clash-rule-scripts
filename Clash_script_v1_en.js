@@ -555,7 +555,7 @@ const rules = [
 
     /**
      * ═══════════════════════════════════════════════════════════
-     *  4-0  High-traffic domestic sites — DIRECT  (top of chain)
+     *  4-0  High-traffic domestic sites — DIRECT  (after blocking rules)
      * ═══════════════════════════════════════════════════════════
      * Hardcoded DIRECT for the most frequently visited Chinese
      * domains, avoiding traversal of ~10 downstream RULE-SETs.

@@ -34,8 +34,8 @@
 |--------|--------|----------|
 | `Clash_script_v1.js` | Clash Verge Rev (Windows / macOS / Linux) | Chinese |
 | `Clash_script_v1_en.js` | Clash Verge Rev (Windows / macOS / Linux) | English |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | Chinese |
-| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta / Stash | English, with visual group toggles |
+| `Clash_script_mobile.js` | Clash Meta for Android | Chinese |
+| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta | English, with visual group toggles |
 
 The desktop CN and EN builds are functionally identical — pick either. The Bettbox build additionally adds per-group panel toggles and a fallback chain; see [Proxy Group Structure](#proxy-group-structure).
 
@@ -78,11 +78,7 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 2. Create a new override and paste the script link or code
 3. Reload your config
 
-**Stash (iOS):**
-
-1. Settings → Override Script
-2. Paste the script link or code
-3. Reload your config
+**Stash:** These JavaScript files use the `main(config)` preprocessing interface and cannot be imported directly as Stash YAML `.stoverride` files. A Stash adapter is not provided.
 
 **Bettbox (FlClash core):**
 
@@ -96,8 +92,8 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 |------|--------|----------|---------|--------|
 | `Clash_script_v1.js` | Clash Verge Rev | Chinese | ✅ | — |
 | `Clash_script_v1_en.js` | Clash Verge Rev | English | ✅ | — |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash | Chinese | — | ✅ |
-| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta / Stash | English | — | ✅ (visual toggles) |
+| `Clash_script_mobile.js` | Clash Meta for Android | Chinese | — | ✅ |
+| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta | English | — | ✅ (visual toggles) |
 
 Desktop CN and EN versions are **functionally identical**; any modification must be synced across both. `ClashScript_ForBettbox.js` extends the mobile build with per-group toggles and a fallback chain. File names `_v1` / `_mobile` are series code names and do not change with minor versions — versioning is tracked via [CHANGELOG.md](CHANGELOG.md) + git tags. Desktop and mobile are independent release lines.
 
@@ -157,8 +153,8 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 | `foreignNameservers` | Overseas DNS | Cloudflare / Google |
 | `steamCDN` list | Steam CDN domains (direct-connect) | Add newly discovered CDNs |
 | `proxyGroups` | Proxy group definitions | Rename / change selection strategy |
-| `healthCheck.interval` | Node health-check interval | Increase on mobile for battery |
-| `healthCheck.tolerance` | Latency tolerance | 50 ms for cellular networks |
+| `HEALTH_CHECK_INTERVAL / GROUP_TIERS` | Node health-check interval | Increase on mobile for battery |
+| `Latency Test.tolerance` | Latency tolerance | 50 ms for cellular networks |
 | `ruleOptionsEnable` (Bettbox) | Whether each group is enabled in the panel | Set `false` to disable; rules auto-fallback |
 | `serviceConfigs` (Bettbox) | Fallback target when a group is disabled | Edit the `fallback` field to rewire the chain |
 
@@ -174,9 +170,9 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 | Steam download 0 bps | Incorrect nameserver-policy order | Ensure `steamCDN` entries precede `geosite:geolocation-!cn` |
 | Steam download goes through proxy | Steam CDN in fake-ip-filter | Review the `fake-ip-filter` list |
 | Domestic sites resolve to foreign IPs | Domestic DNS unreachable | Test `domesticNameservers` DoH endpoints |
-| Mobile node latency spikes | Tolerance too tight | Set `healthCheck.tolerance` to 50+ ms |
+| Mobile node latency spikes | Tolerance too tight | Set `Latency Test.tolerance` to 50+ ms |
 | Log error `main is not defined` | JS preprocessing not enabled | Enable Script in profile settings |
-| Clash Verge syntax error | File saved with CRLF | Repo enforces LF; configure your editor to save as LF |
+| Clash Verge syntax error | Syntax or client interface incompatibility | Inspect the error; CRLF is valid JavaScript, while this repo standardizes LF |
 | A group is missing from the Bettbox panel | Its toggle is off | Check `ruleOptionsEnable` and ensure the entry is `true` |
 | Rules error / dangling after disabling a group | Fallback chain unset | Ensure `serviceConfigs` has a `fallback` pointing to an always-enabled group |
 
@@ -212,7 +208,7 @@ flowchart LR
 | ① DNS | Other domains → overseas DoH (Cloudflare / OpenDNS / Mullvad) or fallback verification |
 | ② Rules | First match wins: Steam CDN → DIRECT / QUIC block → REJECT / … |
 | ② Rules | Functional group exact match → Apple / Google / AI / OpenCode / Steam |
-| ② Rules | `RULE-SET,proxy` + `MATCH` fallback → `Select Node` |
+| ② Rules | `RULE-SET,proxy` → `Select Node`; `MATCH` → `Fallback` |
 | ③ Dispatch | All groups converge on the node pool, selected via url-test / fallback / load-balance |
 
 </details>
@@ -241,3 +237,9 @@ This project references the following third-party open-source resources:
 ## License
 
 [MIT](./LICENSE)
+
+## Verification and releases
+
+Run `node --test`, `node tools/core-check.cjs`, and `node tools/provider-check.cjs`. Runtime scripts have no npm dependencies; the Node tools are for development and CI only.
+
+Use a `fix/*` branch and PR to merge changes into main. The `required-ci` check must pass. After real client acceptance, manually dispatch `release.yml`. See the [release guide](docs/RELEASING.md) for the process and evidence format.

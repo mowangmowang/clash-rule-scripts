@@ -36,8 +36,8 @@
 |------|-----------|------|
 | `Clash_script_v1.js` | Clash Verge Rev(Windows / macOS / Linux) | 中文 |
 | `Clash_script_v1_en.js` | Clash Verge Rev(Windows / macOS / Linux) | English |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash(iOS) | 中文 |
-| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)/ Clash Meta / Stash | English,带可视化分组开关 |
+| `Clash_script_mobile.js` | Clash Meta for Android | 中文 |
+| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)/ Clash Meta | English,带可视化分组开关 |
 
 桌面中英两版功能完全一致,任选其一;Bettbox 版额外提供面板分组开关与回退链,详见[代理组结构](#代理组结构)。
 
@@ -80,11 +80,7 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 2. 新建覆写项,粘贴脚本链接或代码
 3. 回到配置页重载
 
-**Stash(iOS):**
-
-1. 设置 → 覆写脚本(Override Script)
-2. 粘贴脚本链接或代码
-3. 重载配置
+**Stash：** 当前 JavaScript 使用 `main(config)` 配置预处理入口，不能直接作为 Stash 的 YAML `.stoverride` 导入；尚未提供 Stash 适配产物。
 
 **Bettbox(FlClash core):**
 
@@ -98,8 +94,8 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 |------|--------|------|------|------|
 | `Clash_script_v1.js` | Clash Verge Rev | 中文 | ✅ | — |
 | `Clash_script_v1_en.js` | Clash Verge Rev | English | ✅ | — |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash | 中文 | — | ✅ |
-| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)/Clash Meta/Stash | English | — | ✅(可视化开关) |
+| `Clash_script_mobile.js` | Clash Meta for Android | 中文 | — | ✅ |
+| `ClashScript_ForBettbox.js` | Bettbox(FlClash core)/Clash Meta | English | — | ✅(可视化开关) |
 
 桌面中英两版**功能完全一致**,修改必须同步。`ClashScript_ForBettbox.js` 在移动版基础上增加分组开关与回退链。文件名 `_v1` / `_mobile` 是系列代号,不随小版本变化;版本号靠 [CHANGELOG.md](CHANGELOG.md) + git tag。桌面与移动是独立发布线。
 
@@ -159,8 +155,8 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 | `foreignNameservers` | 境外 DNS | 换 Cloudflare / Google |
 | `steamCDN` 列表 | Steam CDN 域名(直连解析) | 加新发现的 CDN |
 | `proxyGroups` | 代理组定义 | 改名 / 改选择策略 |
-| `healthCheck.interval` | 节点健康检查间隔 | 移动端调长省电 |
-| `healthCheck.tolerance` | 延迟容忍 | 蜂窝网络调到 50 ms |
+| `HEALTH_CHECK_INTERVAL / GROUP_TIERS` | 节点健康检查间隔 | 移动端调长省电 |
+| `Latency Test.tolerance` | 延迟容忍 | 蜂窝网络调到 50 ms |
 | `ruleOptionsEnable`(Bettbox) | 各分组是否在面板启用 | 设 `false` 关闭某组,规则自动回退 |
 | `serviceConfigs`(Bettbox) | 关闭分组后的回退目标 | 修改 `fallback` 字段调整回退链 |
 
@@ -176,9 +172,9 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 | Steam 下载 0 bps | nameserver-policy 顺序错 | 确认 `steamCDN` 在 `geosite:geolocation-!cn` 之前 |
 | Steam 下载走代理 | Steam CDN 进了 fake-ip-filter | 检查 `fake-ip-filter` 列表 |
 | 国内网站解析到境外 IP | 国内 DNS 不通 | 测试 `domesticNameservers` 里的 DoH |
-| 移动端节点延迟狂跳 | 容忍阈值太严 | 调 `healthCheck.tolerance` 到 50+ ms |
+| 移动端节点延迟狂跳 | 容忍阈值太严 | 调 `Latency Test.tolerance` 到 50+ ms |
 | 日志报 `main is not defined` | 客户端没启用 JS 预处理 | Profile 设置里勾上 Script |
-| Clash Verge 加载报语法错 | 文件被存为 CRLF | 仓库已强制 LF,确认编辑器存为 LF |
+| Clash Verge 加载报语法错 | 语法或客户端接口不兼容 | 检查具体错误；CRLF 本身不是 JS 语法错误，仓库统一使用 LF |
 | Bettbox 面板看不到某分组 | 该分组开关未勾选 | 检查脚本中 `ruleOptionsEnable`,确认对应项为 `true` |
 | 关闭某组后规则报错/悬空 | 回退链未配置 | 确认 `serviceConfigs` 中该组的 `fallback` 指向一个始终启用的组 |
 
@@ -214,7 +210,7 @@ flowchart LR
 | ① DNS | 其他域名 → 境外 DoH(Cloudflare / OpenDNS / Mullvad)或 fallback 二次验证 |
 | ② 规则 | 规则链首条命中即终止:Steam CDN → DIRECT / QUIC 阻断 → REJECT / … |
 | ② 规则 | 功能组精确命中 → Apple / Google / AI / OpenCode / Steam |
-| ② 规则 | `RULE-SET,proxy` + `MATCH` 兜底 → `Select Node` |
+| ② 规则 | `RULE-SET,proxy` → `Select Node`；`MATCH` → `Fallback` |
 | ③ 调度 | 代理组最终汇聚到节点池,按 url-test / fallback / load-balance 选出节点 |
 
 </details>
@@ -243,3 +239,9 @@ flowchart LR
 ## 协议
 
 [MIT](./LICENSE)
+
+## 验证与发布
+
+运行 `node --test`、`node tools/core-check.cjs` 和 `node tools/provider-check.cjs`。运行脚本无 npm 依赖；这些 Node 工具只用于开发与 CI。
+
+变更通过 `fix/*` 分支和 PR 合入 main。main 的 `required-ci` 必须成功；完成真实客户端验收后，手动触发 `release.yml` 发布。具体流程与验收记录见 [发布指南](docs/RELEASING.md)。

@@ -3,7 +3,7 @@
  *
  * @version     1.6
  * @date        2026-09-28
- * @target      Clash Meta for Android (2.11+), Stash (iOS)
+ * @target      Clash Meta for Android (2.11+)
  * @description Injects DNS, routing rules, proxy groups and regional
  *              auto-grouping into the upstream subscription config,
  *              with Microsoft services support (Outlook mobile /
@@ -23,7 +23,7 @@
  * - applications rule-provider removed       (process-name matching
  *   is unreliable on Android due to selinux isolation).
  * - `icon` properties retained               (verified rendering on
- *   Clash Meta for Android 2.11+ and Stash iOS).
+ *   Clash Meta for Android 2.11+).
  * - IPv6 disabled by default                 (cellular carrier IPv6
  *   routing is frequently broken).
  * - Health-check intervals lengthened        (reduce battery drain
@@ -217,7 +217,7 @@ const ruleProviderCommon = {
 const bm7BaseUrl = "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash";
 
 const ruleProviders = {
-    // ── Advertising & Privacy  (highest priority after domestic & QUIC) ─
+    // ── Advertising & Privacy  (after Steam exceptions and QUIC) ─
     "advertising": {
         ...ruleProviderCommon,
         "url": `${bm7BaseUrl}/Advertising/Advertising.yaml`,
@@ -370,8 +370,7 @@ const rules = [
      * straight to TCP, saving the timeout delay.
      *
      * Compatibility: AND rules are a Clash Meta extension.  Clash Meta
-     * for Android supports them natively.  Stash (iOS) supports AND +
-     * NETWORK rules since v3.0.2 (April 2025).  Clash Premium does NOT
+     * for Android supports these Mihomo logical rules.
      * support AND rules.
      */
     "AND,((DOMAIN-SUFFIX,googlevideo.com),(NETWORK,UDP)),REJECT",
@@ -398,10 +397,10 @@ const rules = [
 
     /**
      * ═══════════════════════════════════════════════════════
-     * §4-0.  High-traffic domestic sites — DIRECT (top of chain)
+     * §4-0.  High-traffic domestic sites — DIRECT (after blocking rules)
      * ═══════════════════════════════════════════════════════
      * Hardcoded DIRECT for the most frequently visited Chinese
-     * domains, skipping ~10 downstream RULE-SET traversals.
+     * domains after applying advertising/privacy block rules.
      * These are already mapped to domestic DNS in nameserver-policy.
      */
     "DOMAIN-SUFFIX,qq.com,DIRECT",
@@ -695,7 +694,7 @@ function main(config) {
     ];
 
     // 【Mobile】Icon assets for regional groups.
-    // Verified rendering on Clash Meta for Android and Stash.
+    // Verified rendering on Clash Meta for Android.
     const FLAG_ICONS = {
         "HK - 香港": "hk.svg",
         "JP - 日本": "jp.svg",
