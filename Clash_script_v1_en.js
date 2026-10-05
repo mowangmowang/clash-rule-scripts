@@ -465,25 +465,6 @@ const ruleProviders = {
 //  4.  Routing Rules  (top → bottom, first match wins)
 // ============================================================
 const rules = [
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     *  4-0  High-traffic domestic sites — DIRECT  (top of chain)
-     * ═══════════════════════════════════════════════════════════
-     * Hardcoded DIRECT for the most frequently visited Chinese
-     * domains, avoiding traversal of ~10 downstream RULE-SETs.
-     * These are already mapped to domestic DNS in nameserver-policy.
-     */
-    "DOMAIN-SUFFIX,qq.com,DIRECT",
-    "DOMAIN-SUFFIX,baidu.com,DIRECT",
-    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
-    "DOMAIN-SUFFIX,taobao.com,DIRECT",
-    "DOMAIN-SUFFIX,jd.com,DIRECT",
-    "DOMAIN-SUFFIX,weixin.com,DIRECT",
-    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
-    "DOMAIN-SUFFIX,csdn.net,DIRECT",
-    "DOMAIN-SUFFIX,gitee.com,DIRECT",
-
     /**
      * ═══════════════════════════════════════════════════════════
      *  4-1  Steam Download — DIRECT  (highest priority after
@@ -570,6 +551,25 @@ const rules = [
      */
     "RULE-SET,advertising,Ad Block,no-resolve",
     "RULE-SET,privacy,Global Block,no-resolve",
+
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     *  4-0  High-traffic domestic sites — DIRECT  (top of chain)
+     * ═══════════════════════════════════════════════════════════
+     * Hardcoded DIRECT for the most frequently visited Chinese
+     * domains, avoiding traversal of ~10 downstream RULE-SETs.
+     * These are already mapped to domestic DNS in nameserver-policy.
+     */
+    "DOMAIN-SUFFIX,qq.com,DIRECT",
+    "DOMAIN-SUFFIX,baidu.com,DIRECT",
+    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
+    "DOMAIN-SUFFIX,taobao.com,DIRECT",
+    "DOMAIN-SUFFIX,jd.com,DIRECT",
+    "DOMAIN-SUFFIX,weixin.com,DIRECT",
+    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
+    "DOMAIN-SUFFIX,csdn.net,DIRECT",
+    "DOMAIN-SUFFIX,gitee.com,DIRECT",
 
     /**
      * ═══════════════════════════════════════════════════════════
@@ -676,8 +676,8 @@ const rules = [
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve",  // Netflix, Disney+, …
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram uses a dedicated group
-    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram uses a dedicated group
+    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,vk,VK,no-resolve",               // VK uses a dedicated group
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
@@ -688,7 +688,6 @@ const rules = [
 
     // Loyalsoldier proxy list (catch-all for commonly blocked
     // domains — GFW list merged in, as overlap was >80%)
-    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ═══════════════════════════════════════════════════════════
@@ -699,6 +698,9 @@ const rules = [
     // the Apple Services proxy group.
     "RULE-SET,apple,Apple Services,no-resolve",
     "RULE-SET,microsoft,Microsoft Services",
+
+    // General proxy list follows explicit service policies.
+    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ═══════════════════════════════════════════════════════════

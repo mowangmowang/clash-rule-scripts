@@ -406,27 +406,9 @@ const ruleProviders = {
 // § 4. 路由规则列表（从上到下，第一个命中即停止）
 // ============================================================
 const rules = [
-
     /**
      * ══════════════════════════════════════════════════════
-     * § 4-0. 高频国内服务直连（规则链最顶部，减少后续规则集遍历）
-     * ══════════════════════════════════════════════════════
-     * 国内流量占比最高的域名硬编码为 DIRECT，跳过后续 ~10 条 RULE-SET 匹配开销。
-     * 这些域名已同步加入 nameserver-policy 确保国内 DNS 解析。
-     */
-    "DOMAIN-SUFFIX,qq.com,DIRECT",
-    "DOMAIN-SUFFIX,baidu.com,DIRECT",
-    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
-    "DOMAIN-SUFFIX,taobao.com,DIRECT",
-    "DOMAIN-SUFFIX,jd.com,DIRECT",
-    "DOMAIN-SUFFIX,weixin.com,DIRECT",
-    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
-    "DOMAIN-SUFFIX,csdn.net,DIRECT",
-    "DOMAIN-SUFFIX,gitee.com,DIRECT",
-
-    /**
-     * ══════════════════════════════════════════════════════
-     * § 4-1. Steam 下载直连（仅次于国内高频域名，在所有规则集之前）
+     * § 4-1. Steam 下载直连（在所有规则集之前）
      * ══════════════════════════════════════════════════════
      *
      * 【为什么必须放在最顶部？】
@@ -501,6 +483,24 @@ const rules = [
      */
     "RULE-SET,advertising,Ad Block,no-resolve",
     "RULE-SET,privacy,Global Block,no-resolve",
+
+
+    /**
+     * ══════════════════════════════════════════════════════
+     * § 4-0. 高频国内服务直连（拦截规则之后）
+     * ══════════════════════════════════════════════════════
+     * 国内常用域名直连，但必须先通过广告 / 隐私拦截。
+     * 这些域名已同步加入 nameserver-policy 确保国内 DNS 解析。
+     */
+    "DOMAIN-SUFFIX,qq.com,DIRECT",
+    "DOMAIN-SUFFIX,baidu.com,DIRECT",
+    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
+    "DOMAIN-SUFFIX,taobao.com,DIRECT",
+    "DOMAIN-SUFFIX,jd.com,DIRECT",
+    "DOMAIN-SUFFIX,weixin.com,DIRECT",
+    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
+    "DOMAIN-SUFFIX,csdn.net,DIRECT",
+    "DOMAIN-SUFFIX,gitee.com,DIRECT",
 
     /**
      * ══════════════════════════════════════════════════════
@@ -598,8 +598,8 @@ const rules = [
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve", // Netflix、Disney+ 等境外流媒体合集
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram 独立分流
-    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram 独立分流
+    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,vk,VK,no-resolve",               // VK 独立分流（社交 / 视频 / VK Play）
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
@@ -609,7 +609,6 @@ const rules = [
     "RULE-SET,github,GitHub,no-resolve",   // GitHub 系服务独立分流（github.com / ghcr.io / npm 等）
 
     // Loyalsoldier 代理列表（兜底覆盖常见被墙域名，已合并原 gfw 规则集）
-    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ══════════════════════════════════════════════════════
@@ -619,6 +618,9 @@ const rules = [
     // BM7 Apple 规则集包含 Apple CDN，交给 Apple Services 组统一调度
     "RULE-SET,apple,Apple Services,no-resolve",
     "RULE-SET,microsoft,Microsoft Services",
+
+    // General proxy list follows explicit service policies.
+    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ══════════════════════════════════════════════════════
