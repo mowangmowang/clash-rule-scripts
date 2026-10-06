@@ -151,6 +151,7 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 |----------|-----------------|---------------|
 | `domesticNameservers` | Domestic DNS (CN domains) | Faster DoH, e.g. `https://1.12.12.12/dns-query` |
 | `foreignNameservers` | Overseas DNS | Cloudflare / Google |
+| `ENABLE_IPV6` | DNS IPv6 on desktop; both DNS and top-level IPv6 on mobile/Bettbox | Default `false`; adjust desktop top-level IPv6 in Settings → Clash Settings → IPv6 |
 | `steamCDN` list | Steam CDN domains (direct-connect) | Add newly discovered CDNs |
 | `proxyGroups` | Proxy group definitions | Rename / change selection strategy |
 | `HEALTH_CHECK_INTERVAL / GROUP_TIERS` | Node health-check interval | Increase on mobile for battery |
@@ -172,6 +173,7 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 | Domestic sites resolve to foreign IPs | Domestic DNS unreachable | Test `domesticNameservers` DoH endpoints |
 | Mobile node latency spikes | Tolerance too tight | Set `Latency Test.tolerance` to 50+ ms |
 | Log error `main is not defined` | JS preprocessing not enabled | Enable Script in profile settings |
+| Warning that an `ipv6` write was discarded | Clash Verge owns top-level IPv6 | Use the corrected desktop script and change the Clash Settings switch; DNS override has a separate IPv6 setting, so inspect final configuration |
 | Clash Verge syntax error | Syntax or client interface incompatibility | Inspect the error; CRLF is valid JavaScript, while this repo standardizes LF |
 | A group is missing from the Bettbox panel | Its toggle is off | Check `ruleOptionsEnable` and ensure the entry is `true` |
 | Rules error / dangling after disabling a group | Fallback chain unset | Ensure `serviceConfigs` has a `fallback` pointing to an always-enabled group |

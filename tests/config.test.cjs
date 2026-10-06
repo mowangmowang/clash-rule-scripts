@@ -22,13 +22,26 @@ for (const file of scripts) {
         assert.equal(out.rules.some(rule => rule.startsWith('PROCESS-NAME')), !mobile);
         if (!mobile) assert.equal(routeDomain(out, 'steampipe.akamaized.net', fixtures), 'DIRECT');
     });
-    test(`${file}: IPv6 is explicit and configurable`, () => {
-        const out = load(file).run(sample());
-        assert.equal(out.dns.ipv6, false);
-        assert.equal(out.ipv6, false);
-        const enabled = load(file, source => source.replace('const ENABLE_IPV6 = false;', 'const ENABLE_IPV6 = true;')).run(sample());
-        assert.equal(enabled.dns.ipv6, true);
-        assert.equal(enabled.ipv6, true);
+    test(`${file}: DNS IPv6 is configurable and top-level ownership is respected`, () => {
+        const mobile = /mobile|Bettbox/.test(file);
+        for (const dnsEnabled of [false, true]) {
+            const runner = load(file, source => source.replace('const ENABLE_IPV6 = false;', `const ENABLE_IPV6 = ${dnsEnabled};`));
+            for (const appValue of [undefined, false, true]) {
+                const input = sample();
+                if (appValue !== undefined) input.ipv6 = appValue;
+                const out = runner.run(input);
+                assert.equal(out.dns.ipv6, dnsEnabled);
+                if (mobile) {
+                    assert.equal(out.ipv6, dnsEnabled);
+                } else {
+                    assert.equal(Object.hasOwn(out, 'ipv6'), appValue !== undefined,
+                        'desktop must neither add nor delete the app-owned field');
+                    assert.equal(out.ipv6, appValue, 'desktop must preserve the application value');
+                }
+                assert.equal(input.ipv6, appValue, 'input must remain unchanged');
+                assert.equal(Object.hasOwn(input, 'ipv6'), appValue !== undefined);
+            }
+        }
     });
     test(`${file}: sniffer has protocol and platform settings`, () => {
         const sniff = plain(load(file).run(sample()).sniffer);

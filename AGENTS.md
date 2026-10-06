@@ -10,8 +10,11 @@ Development tools and tests may use Node built-ins without installing npm packag
 Change the Chinese desktop script first and synchronize the English script:
 behavior must be identical. Synchronize applicable changes to mobile and Bettbox
 in the same commit. Mobile excludes Steam download and process rules, preserves
-connectivity checks, longer health checks and supported icons. IPv6 defaults off
-in DNS and at the top level, controlled by `ENABLE_IPV6`.
+connectivity checks, longer health checks and supported icons. `ENABLE_IPV6`
+defaults off. Desktop scripts use it for DNS only and preserve the input's
+top-level `ipv6` (including absence); Clash Verge Settings owns that field.
+Mobile and Bettbox still use the flag for both DNS and top-level IPv6.
+Client DNS override can own DNS fields too; inspect the final running values.
 
 Bettbox maintains `ruleOptionsEnable`, `serviceConfigs`, `knownGroupNames`, and
 terminal fallbacks. Disabled groups must leave no dangling references or cycles.

@@ -72,20 +72,22 @@ const DNS_LISTEN   = "0.0.0.0:1053";
 // [2026-06-09 fix] Windows web Apple Music ERR_CONNECTION_CLOSED:
 // browsers issue A + AAAA in parallel for *.apple.com; Akamai v6 edges
 // frequently RST chunk requests, surfacing as ERR_CONNECTION_CLOSED.
-// Mobile script already forces v4-only — align the desktop script.
-const ENABLE_IPV6 = false; // Enable only on networks with working IPv6.
+// Align the mobile DNS IPv4-only default; the client manages top-level IPv6.
+const ENABLE_IPV6 = false; // Controls DNS IPv6; Clash Verge Settings owns top-level ipv6.
 
 const dnsConfig = {
     "enable": true,
     "listen": DNS_LISTEN,
 
     /**
-     * Disable IPv6.
+     * Disable DNS IPv6 resolution by default.
      *
      * IPv6 routing is unreliable on many networks, causing
      * connection timeouts or outright failures.  Dual-stack
      * services (Steam, Apple, etc.) may prefer IPv6 and fail
-     * silently. Set ENABLE_IPV6 to true when IPv6 is required and working.
+     * silently. Set ENABLE_IPV6 to true when IPv6 is required and working,
+     * and enable IPv6 in Clash Verge Settings. If client DNS override is enabled,
+     * check whether its settings also take ownership of the final dns.ipv6.
      */
     "ipv6": ENABLE_IPV6,
 
@@ -840,7 +842,7 @@ function main(config) {
 
     // Fully replace the subscription's DNS settings with ours.
     config["dns"] = copyConfigData(dnsConfig);
-    config["ipv6"] = ENABLE_IPV6;
+    // Preserve input ipv6; Clash Verge discards conflicting writes to app-owned fields.
 
     /**
      * Enable the domain sniffer.

@@ -54,18 +54,19 @@ const foreignNameservers = [
 const DNS_LISTEN = "0.0.0.0:1053";
 // 【2026-06-09 修复】Windows Web 端 Apple Music 报 ERR_CONNECTION_CLOSED：
 // 浏览器对 *.apple.com 同时发起 A + AAAA 解析，Akamai v6 边缘对 chunk 请求经常 RST，
-// 表现即 ERR_CONNECTION_CLOSED。Mobile 脚本已强制 v4-only，对齐之。
-const ENABLE_IPV6 = false; // Enable only on networks with working IPv6.
+// 表现即 ERR_CONNECTION_CLOSED。默认 DNS IPv4-only 与 Mobile 对齐，顶层开关由客户端管理。
+const ENABLE_IPV6 = false; // 控制 DNS IPv6；顶层 ipv6 由 Clash Verge 设置管理。
 
 const dnsConfig = {
     "enable": true,
     "listen": DNS_LISTEN,
 
     /**
-     * 【关键】禁用 IPv6
+     * 【关键】默认禁用 DNS IPv6 解析
      * 原因：部分网络环境 IPv6 路由不稳定，会导致连接超时或失败。
      * Steam、Apple 等服务在双栈环境下可能优先尝试 IPv6 而失败。
-     * 需要 IPv6 的网络可将 ENABLE_IPV6 设为 true；同时控制 DNS 和顶层开关。
+     * 需要 IPv6 的网络可将 ENABLE_IPV6 设为 true，并在 Clash Verge 设置中开启 IPv6。
+     * 若启用客户端 DNS 覆写，需同时核对最终 dns.ipv6 是否被客户端设置接管。
      */
     "ipv6": ENABLE_IPV6,
 
@@ -751,7 +752,7 @@ function main(config) {
 
     // 用本脚本的 DNS 配置完整覆盖订阅源的 DNS 设置
     config["dns"] = copyConfigData(dnsConfig);
-    config["ipv6"] = ENABLE_IPV6;
+    // 保留输入的顶层 ipv6；Clash Verge 会丢弃脚本对应用管理字段的冲突写入。
 
     // 【新增】开启 sniffer 域名嗅探
     // 恢复纯 IP 流量的 HTTP Host / 普通 TLS SNI；不能解密 ECH。

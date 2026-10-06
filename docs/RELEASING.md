@@ -47,11 +47,15 @@ Inspect the generated runtime configuration as well as client logs and connectio
   while normal Baidu/JD pages work through DIRECT.
 - DNS and top-level IPv6 settings are false. Use a fresh uncached AAAA query
   through the client's configured DNS listener and confirm no IPv6 result.
-  Check the final running configuration, not only the JavaScript source: a client
-  can apply its base settings after preprocessing. During local Clash Verge
-  v2.5.6 acceptance, DNS IPv6 was false and an AAAA query returned zero answers,
-  but the base and final top-level IPv6 were still true. Disable the client's
-  IPv6 setting, reload, and recheck before marking this item passed.
+  Desktop `ENABLE_IPV6` controls DNS only; the script preserves the input's
+  top-level `ipv6`, including its absence. In Clash Verge v2.5.6, top-level IPv6
+  is app-owned and conflicting script writes are discarded. Disable the separate
+  Settings → Clash Settings → IPv6 switch, reload and check the actual running
+  configuration/API. Check that a fresh reload produces no `ipv6` discarded-field
+  notice. The IPv6 switch inside DNS override controls `dns.ipv6` instead; enabling
+  DNS override can make the client own DNS fields as well. Inspect both final
+  values before marking acceptance passed.
+  [Clash Verge ownership implementation](https://github.com/clash-verge-rev/clash-verge-rev/blob/v2.5.6/src-tauri/src/enhance/mod.rs#L285)
 - With debug logs temporarily enabled, visit HTTP and TLS sites in configured
   ports and inspect sniffed domains. Confirm platform skip domains are preserved.
   QUIC remains affected by existing blocking rules; sniffing does not decrypt ECH.

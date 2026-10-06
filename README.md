@@ -153,6 +153,7 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 |------|---------|---------|
 | `domesticNameservers` | 国内 DNS(解析 CN 域名) | 换更快的 DoH,如 `https://1.12.12.12/dns-query` |
 | `foreignNameservers` | 境外 DNS | 换 Cloudflare / Google |
+| `ENABLE_IPV6` | 桌面版仅控制 DNS IPv6；移动/Bettbox 同时控制 DNS 与顶层 IPv6 | 默认 `false`；桌面顶层开关在「设置 → Clash 设置 → IPv6」中调整 |
 | `steamCDN` 列表 | Steam CDN 域名(直连解析) | 加新发现的 CDN |
 | `proxyGroups` | 代理组定义 | 改名 / 改选择策略 |
 | `HEALTH_CHECK_INTERVAL / GROUP_TIERS` | 节点健康检查间隔 | 移动端调长省电 |
@@ -174,6 +175,7 @@ Bettbox 版可在面板勾选开关关闭任意分组,该组不生成,指向它�
 | 国内网站解析到境外 IP | 国内 DNS 不通 | 测试 `domesticNameservers` 里的 DoH |
 | 移动端节点延迟狂跳 | 容忍阈值太严 | 调 `Latency Test.tolerance` 到 50+ ms |
 | 日志报 `main is not defined` | 客户端没启用 JS 预处理 | Profile 设置里勾上 Script |
+| 提示 `ipv6` 写入值已被丢弃 | Clash Verge 接管顶层 IPv6 | 使用桌面修正版并在 Clash 设置中调整开关；DNS 覆写中的 IPv6 是另一项设置，检查最终配置 |
 | Clash Verge 加载报语法错 | 语法或客户端接口不兼容 | 检查具体错误；CRLF 本身不是 JS 语法错误，仓库统一使用 LF |
 | Bettbox 面板看不到某分组 | 该分组开关未勾选 | 检查脚本中 `ruleOptionsEnable`,确认对应项为 `true` |
 | 关闭某组后规则报错/悬空 | 回退链未配置 | 确认 `serviceConfigs` 中该组的 `fallback` 指向一个始终启用的组 |
