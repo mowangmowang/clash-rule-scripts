@@ -250,8 +250,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 
-- Disable IPv6 by default in both top-level and DNS configuration using
-  `ENABLE_IPV6`; repair the inverted setting and remove misleading comments.
+- Disable DNS IPv6 by default using `ENABLE_IPV6`; repair the inverted setting.
+  Preserve the input's top-level `ipv6`, including absence, because Clash Verge
+  v2.5.6 Settings owns it and discards conflicting script writes. Document the
+  separate application and DNS switches and verify final runtime settings.
 - Configure HTTP/TLS/QUIC sniffer protocols and ports, DNS mapping and pure-IP
   parsing explicitly while keeping destination override disabled and platform
   skip domains. Sniffing does not decrypt ECH.
