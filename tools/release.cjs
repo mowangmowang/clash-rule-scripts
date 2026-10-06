@@ -18,7 +18,7 @@ function command(binary, args) {
     if (result.status !== 0) throw new Error(`${binary} ${args[0]} failed: ${result.stderr.trim()}`);
     return result.stdout.trim();
 }
-function api(endpoint) { return JSON.parse(command('gh', ['api', endpoint])); }
+function api(endpoint, args = []) { return JSON.parse(command('gh', ['api', endpoint, ...args])); }
 function maybeApi(endpoint) {
     try { return api(endpoint); } catch (error) { if (/HTTP 404/.test(error.message)) return null; throw error; }
 }
@@ -180,7 +180,9 @@ function compareReleaseAssets(release, manifest, line, uploadMissing) {
             ensure(!result.error && result.status === 0 && hash(result.stdout) === hash(expected), `Existing asset differs: ${name}`);
         } else {
             ensure(uploadMissing && release.draft, `Missing published asset: ${name}`);
-            command('gh', ['release', 'upload', release.tag_name, path.join(directory, name), '--repo', manifest.repo]);
+            const asset = api(`https://uploads.github.com/repos/${manifest.repo}/releases/${release.id}/assets?name=${encodeURIComponent(name)}`,
+                ['--method', 'POST', '-H', 'Content-Type: application/octet-stream', '--input', path.join(directory, name)]);
+            ensure(Number.isSafeInteger(asset.id) && asset.id > 0 && asset.name === name, `Unexpected upload response: ${name}`);
         }
     }
 }
@@ -214,19 +216,24 @@ function publish(options) {
         if (release) {
             validateReleaseDetail(release, { ...manifest, resume: options.resume }, line);
         } else {
-            const notes = path.join(root, 'release-artifacts', `${line}-notes.md`);
-            fs.writeFileSync(notes, releaseNotes(manifest, line === 'desktop' ? 'Desktop' : 'Mobile'));
-            command('gh', ['release', 'create', tag, '--draft', '--verify-tag', '--target', options.sha,
-                '--repo', options.repo, '--title', title, '--notes-file', notes]);
-            release = findRelease(options.repo, tag);
-            ensure(release?.draft && release.target_commitish === options.sha, `Created draft is missing or conflicting: ${tag}`);
+            const request = path.join(root, 'release-artifacts', `${line}-request.json`);
+            fs.writeFileSync(request, JSON.stringify({ tag_name: tag, target_commitish: options.sha, name: title,
+                draft: true, prerelease: false, body: releaseNotes(manifest, line === 'desktop' ? 'Desktop' : 'Mobile') }));
+            // Keep the POST response's ID instead of immediately looking up a new
+            // draft through a release list that can lag behind creation.
+            release = api(`repos/${options.repo}/releases`, ['--method', 'POST', '--input', request]);
+            ensure(Number.isSafeInteger(release.id) && release.id > 0 && release.tag_name === tag &&
+                release.draft && release.target_commitish === options.sha, `Created draft is missing or conflicting: ${tag}`);
         }
         compareReleaseAssets(release, manifest, line, true);
         const complete = api(`repos/${options.repo}/releases/${release.id}`);
         compareReleaseAssets(complete, manifest, line, false);
         releases.push(complete);
     }
-    for (const release of releases) if (release.draft) command('gh', ['release', 'edit', release.tag_name, '--draft=false', '--repo', options.repo]);
+    for (const release of releases) if (release.draft) {
+        const published = api(`repos/${options.repo}/releases/${release.id}`, ['--method', 'PATCH', '-F', 'draft=false']);
+        ensure(published.tag_name === release.tag_name && !published.draft, 'Publication response did not confirm the release');
+    }
     for (const line of ['desktop', 'mobile']) {
         const tag = `${line}-v${options.version}`;
         validateTag(tag, api(`repos/${options.repo}/git/ref/tags/${tag}`), options, line === 'desktop' ? 'Desktop' : 'Mobile');

@@ -38,7 +38,7 @@ test('publication creates verified drafts, survives one public release, and refu
     let failSecondPublication = true;
     const success = stdout => ({ status: 0, stdout, stderr: '' });
     const failure = stderr => ({ status: 1, stdout: '', stderr });
-    t.mock.method(cp, 'spawnSync', (binary, args, spawnOptions) => {
+    t.mock.method(cp, 'spawnSync', (binary, args) => {
         if (binary === 'git') {
             if (args[0] === 'fetch' || args[0] === 'config') return success('');
             if (args[0] === 'rev-parse') return success(mainSha);
@@ -55,6 +55,36 @@ test('publication creates verified drafts, survives one public release, and refu
         assert.equal(binary, 'gh');
         if (args[0] === 'api') {
             const endpoint = args[1];
+            const method = args.includes('--method') ? args[args.indexOf('--method') + 1] : 'GET';
+            if (method === 'POST' && endpoint === 'repos/owner/repo/releases') {
+                const payload = JSON.parse(fs.readFileSync(args[args.indexOf('--input') + 1], 'utf8'));
+                assert.equal(payload.draft, true); assert.equal(payload.target_commitish, sha);
+                assert.ok(refs.has(payload.tag_name), 'tags must already exist before creating a draft');
+                const release = { ...payload, id: releases.size + 1, assets: [], html_url: `https://github.com/owner/repo/releases/tag/${payload.tag_name}` };
+                releases.set(payload.tag_name, release); mutations.push(['draft', payload.tag_name]);
+                return success(JSON.stringify(release));
+            }
+            if (method === 'POST' && endpoint.startsWith('https://uploads.github.com/')) {
+                const url = new URL(endpoint);
+                const releaseId = Number(url.pathname.split('/').at(-2));
+                const release = [...releases.values()].find(item => item.id === releaseId);
+                assert.ok(release.draft); assert.ok(args.includes('Content-Type: application/octet-stream'));
+                const name = url.searchParams.get('name');
+                assert.ok(!release.assets.some(asset => asset.name === name), 'must never overwrite assets');
+                const asset = { name, id: ++assetId };
+                assets.set(asset.id, fs.readFileSync(args[args.indexOf('--input') + 1]));
+                release.assets.push(asset); mutations.push(['upload', release.tag_name, name]);
+                return success(JSON.stringify(asset));
+            }
+            if (method === 'PATCH' && /\/releases\/\d+$/.test(endpoint)) {
+                const release = [...releases.values()].find(item => item.id === Number(endpoint.split('/').at(-1)));
+                if (release.tag_name.startsWith('mobile') && failSecondPublication) return failure('simulated partial API outage');
+                assert.ok(args.includes('draft=false'));
+                assert.ok([...releases.values()].every(item => item.assets.length === 3));
+                release.draft = false; mutations.push(['public', release.tag_name]);
+                return success(JSON.stringify(release));
+            }
+            assert.equal(method, 'GET');
             let data;
             if (endpoint.endsWith('/issues/comments/123')) data = { issue_url: 'https://api.github.com/repos/owner/repo/issues/42',
                 author_association: 'OWNER', body: '<!-- myscript-client-acceptance -->\n```json\n' + JSON.stringify({ version, files: hashes,
@@ -71,7 +101,9 @@ test('publication creates verified drafts, survives one public release, and refu
             else if (endpoint.includes('/git/tags/')) {
                 const tag = endpoint.split('/').at(-1);
                 data = { tag, object: { type: 'commit', sha }, message: localTags.get(tag) };
-            } else if (endpoint.includes('/releases?')) data = [...releases.values()];
+            // Newly created drafts are deliberately absent from the list until
+            // the ID-based upload occurs, reproducing creation/indexing lag.
+            } else if (endpoint.includes('/releases?')) data = [...releases.values()].filter(item => item.assets.length > 0);
             else if (endpoint.includes('/releases/tags/')) {
                 data = releases.get(endpoint.split('/').at(-1));
                 if (data?.draft) { draftTagLookups++; return failure('HTTP 404'); }
@@ -81,26 +113,7 @@ test('publication creates verified drafts, survives one public release, and refu
             else throw new Error(`Unexpected API: ${endpoint}`);
             return data ? success(JSON.stringify(data)) : failure('HTTP 404');
         }
-        assert.equal(args[0], 'release');
-        const tag = args[2];
-        if (args[1] === 'create') {
-            assert.ok(args.includes('--draft')); assert.ok(args.includes('--verify-tag'));
-            releases.set(tag, { id: releases.size + 1, tag_name: tag, name: args[args.indexOf('--title') + 1], target_commitish: sha, draft: true,
-                prerelease: false, body: fs.readFileSync(args[args.indexOf('--notes-file') + 1], 'utf8'), assets: [], html_url: `https://github.com/owner/repo/releases/tag/${tag}` });
-            mutations.push(['draft', tag]);
-        } else if (args[1] === 'upload') {
-            assert.ok(!args.includes('--clobber'));
-            const release = releases.get(tag); assert.ok(release.draft);
-            const name = path.basename(args[3]);
-            const id = ++assetId;
-            assets.set(id, fs.readFileSync(args[3])); release.assets.push({ name, id }); mutations.push(['upload', tag, name]);
-        } else if (args[1] === 'edit') {
-            if (tag.startsWith('mobile') && failSecondPublication) return failure('simulated partial API outage');
-            assert.ok(args.includes('--draft=false'));
-            assert.ok([...releases.values()].every(release => release.assets.length === 3));
-            releases.get(tag).draft = false; mutations.push(['public', tag]);
-        } else throw new Error(`Unexpected release operation ${args}`);
-        return success(spawnOptions.encoding ? '' : Buffer.alloc(0));
+        throw new Error(`Unexpected gh operation ${args}`);
     });
     const modulePath = require.resolve('../tools/release.cjs');
     delete require.cache[modulePath];
