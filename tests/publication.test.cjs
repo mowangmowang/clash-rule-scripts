@@ -58,6 +58,7 @@ test('publication creates verified drafts, survives one public release, and refu
                         [kind, { name: 'fixture', version: '0.0.0', checks: Object.fromEntries(checks.map(check => [check, true])) }])) }) + '\n```' };
             else if (endpoint.endsWith('/pulls/42')) data = { merged: true, base: { ref: 'main', repo: { full_name: 'owner/repo' } }, merge_commit_sha: sha };
             else if (endpoint.includes('/actions/workflows/')) data = { workflow_runs: [{ id: 1, head_sha: sha, status: 'completed', conclusion: 'success', html_url: 'https://github.com/owner/repo/actions/runs/1' }] };
+            else if (endpoint.endsWith('/git/ref/heads/main')) data = { object: { sha } };
             else if (endpoint.includes('/git/ref/tags/')) data = refs.get(endpoint.split('/').at(-1));
             else if (endpoint.includes('/git/tags/')) {
                 const tag = endpoint.split('/').at(-1);

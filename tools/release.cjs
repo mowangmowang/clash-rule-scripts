@@ -119,6 +119,13 @@ function releaseNotes(manifest, line) {
         `Commit: ${manifest.sha}\n\nClient acceptance: ${manifest.evidenceUrl}\n\n` +
         `Validation: ${manifest.validationUrl}\n\nRelease run: ${manifest.releaseRun}\n`;
 }
+function validateReleaseDetail(release, manifest, line) {
+    const label = line === 'desktop' ? 'Desktop' : 'Mobile';
+    const stableNotes = text => text.replace(/^Release run: .*$/m, 'Release run:').trim();
+    ensure(manifest.resume && release.tag_name === `${line}-v${manifest.version}` &&
+        release.name === `${label} v${manifest.version}` && release.target_commitish === manifest.sha &&
+        !release.prerelease && stableNotes(release.body || '') === stableNotes(releaseNotes(manifest, label)), 'Conflicting existing release');
+}
 function assetPlan(manifest, line) {
     const files = line === 'desktop' ? scripts.slice(0, 2) : scripts.slice(2);
     return [...files, `${line}-SHA256SUMS.txt`];
@@ -154,6 +161,7 @@ function publish(options) {
     }
     const tags = ['desktop', 'mobile'].map(line => `${line}-v${options.version}`);
     const existing = tags.map(tag => maybeApi(`repos/${options.repo}/git/ref/tags/${tag}`));
+    ensure(api(`repos/${options.repo}/git/ref/heads/main`).object.sha === options.sha, 'Main changed immediately before tag creation');
     if (tagMode(existing, options.resume) === 'reuse') tags.forEach((tag, index) => validateTag(tag, existing[index], options, index === 0 ? 'Desktop' : 'Mobile'));
     else {
         command('git', ['config', 'user.name', 'github-actions[bot]']);
@@ -168,8 +176,7 @@ function publish(options) {
         const title = `${line === 'desktop' ? 'Desktop' : 'Mobile'} v${options.version}`;
         let release = maybeApi(`repos/${options.repo}/releases/tags/${tag}`);
         if (release) {
-            ensure(options.resume && release.name === title && release.target_commitish === options.sha &&
-                release.body.includes(`Commit: ${options.sha}`) && release.body.includes(`Client acceptance: ${options.evidenceUrl}`), 'Conflicting existing release');
+            validateReleaseDetail(release, { ...manifest, resume: options.resume }, line);
         } else {
             const notes = path.join(root, 'release-artifacts', `${line}-notes.md`);
             fs.writeFileSync(notes, releaseNotes(manifest, line === 'desktop' ? 'Desktop' : 'Mobile'));
@@ -194,7 +201,7 @@ function publish(options) {
     if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
         `## Release ${options.version}\n\nCommit: ${options.sha}\n\nAcceptance: ${options.evidenceUrl}\n\nBoth annotated tags and all four downloadable script hashes verified.\n`);
 }
-module.exports = { inputs, evidenceLocation, validateEvidence, clientChecks, scriptHashes, tagMode, validateTagDetail, packageRelease, publish };
+module.exports = { inputs, evidenceLocation, validateEvidence, clientChecks, scriptHashes, tagMode, validateTagDetail, validateReleaseDetail, releaseNotes, packageRelease, publish };
 if (require.main === module) {
     try {
         const options = inputs();

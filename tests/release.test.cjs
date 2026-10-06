@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { scripts } = require('./helpers.cjs');
-const { inputs, evidenceLocation, validateEvidence, clientChecks, tagMode, validateTagDetail } = require('../tools/release.cjs');
+const { inputs, evidenceLocation, validateEvidence, clientChecks, tagMode, validateTagDetail, validateReleaseDetail, releaseNotes } = require('../tools/release.cjs');
 
 const env = { RELEASE_VERSION: '1.6.1', TARGET_SHA: 'a'.repeat(40), CLIENTS_VERIFIED: 'true',
     RELEASE_RESUME: 'false', GITHUB_REF: 'refs/heads/main', GITHUB_REPOSITORY: 'owner/repo',
@@ -45,4 +45,13 @@ test('resume only reuses both annotated tags with matching version, message and 
     assert.doesNotThrow(() => validateTagDetail(detail.tag, detail, inputs(env), 'Desktop'));
     for (const changed of [{ ...detail, message: 'other' }, { ...detail, object: { type: 'commit', sha: 'c'.repeat(40) } },
         { ...detail, object: { type: 'tag', sha: env.TARGET_SHA } }]) assert.throws(() => validateTagDetail(detail.tag, changed, inputs(env), 'Desktop'));
+});
+test('resume preserves release notes and metadata, allowing only a different run URL', () => {
+    const manifest = { ...inputs(env), resume: true, validationUrl: 'https://github.com/owner/repo/actions/runs/1', releaseRun: 'old' };
+    const release = { tag_name: 'desktop-v1.6.1', name: 'Desktop v1.6.1', target_commitish: manifest.sha,
+        prerelease: false, body: releaseNotes(manifest, 'Desktop') };
+    assert.doesNotThrow(() => validateReleaseDetail(release, { ...manifest, releaseRun: 'new' }, 'desktop'));
+    for (const changed of [{ ...release, body: release.body.replace('Correct IPv6', 'Different description') },
+        { ...release, target_commitish: 'b'.repeat(40) }, { ...release, prerelease: true }])
+        assert.throws(() => validateReleaseDetail(changed, manifest, 'desktop'));
 });
