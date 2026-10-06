@@ -61,6 +61,9 @@ Never manufacture evidence or set `clients_verified` without actual results.
   CHANGELOG separately. Follow `docs/RELEASING.md` for publication and recovery.
 - Never move published tags or overwrite released assets. Resume a partial
   publication at the same SHA; new code after publication requires a new version.
+- Publication tooling can be repaired through a separate PR while resuming the
+  original existing tags. This requires identical four script hashes, tag/ancestry
+  checks and successful CI for both source and current tooling; see RELEASING.md.
 - Remove the fix branch after successful release.
 - Use pinned URLs for production and rollback: `@main` changes at PR merge,
   before a formal release.

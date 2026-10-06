@@ -146,7 +146,20 @@ main. `@main` links update when the PR merges, before version publication.
   dispatch identical version/SHA/evidence with `resume=true`. Existing asset bytes
   must match; missing assets may be added only to draft Releases. Published assets
   are never replaced. A single preexisting tag or conflicting asset stops the run.
-- If one Release is public, keep it and resume the other. If main has changed, the
-  current-main guard stops automated resume; investigate before any manual repair.
+- Draft releases are found through the paginated release list and refreshed by
+  release ID. The tag lookup endpoint only supports published releases; do not use
+  it to read a newly created draft. Duplicate releases for a tag stop publication.
+  [GitHub release API](https://docs.github.com/en/rest/releases/releases)
+- If publication tooling itself needs repair, use a new fix branch and PR, wait
+  for its main CI, then resume from the current main workflow with the original
+  immutable tag SHA and acceptance comment. This narrow recovery requires both
+  matching annotated tags, the original target to be an ancestor of current main,
+  all four current scripts to be byte-identical to the target, and successful push
+  CI for both target and current tooling SHA. Packaging and publication recheck the
+  current main SHA; any script, tag, evidence or package conflict stops recovery.
+  The verification job parses the original target; current main CI also tests the
+  repaired publication code. Tags and release commit remain the original target.
+- If one Release is public, keep it and resume the other. Changed script bytes
+  cannot use this recovery path; investigate and use a new patch version.
 - Public code bug: open a new fix branch and publish the next patch version. Revert
   main through a PR if needed; leave historical tags intact.
