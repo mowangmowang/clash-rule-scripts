@@ -1,10 +1,10 @@
 /**
  * ClashScript for Bettbox - Configuration Script
  *
- * @version     1.6
- * @date        2026-09-28
- * @target      Bettbox (FlClash core), Clash Meta for Android, Stash
- * @basedon     Clash_script_mobile.js v1.6
+ * @version     1.6.1
+ * @date        2026-10-05
+ * @target      Bettbox (FlClash core), Clash Meta for Android
+ * @basedon     Clash_script_mobile.js v1.6.1
  *
  * When a group is disabled, the group is not generated and rules targeting
  * it are rewritten through the fallback chain defined in serviceConfigs.
@@ -113,7 +113,7 @@ const foreignNameservers = [
 // ============================================================
 
 const DNS_LISTEN = "0.0.0.0:1053";
-const DISABLE_IPV6 = true;  // Mobile: carrier IPv6 is frequently broken
+const ENABLE_IPV6 = false; // Enable only on networks with working IPv6.
 
 const dnsConfig = {
     "enable": true,
@@ -121,11 +121,10 @@ const dnsConfig = {
 
     /**
      * 【Mobile】IPv6 disabled.
-     * Many Chinese cellular carriers have broken IPv6 routing, causing
-     * connection timeouts.  On pure-IPv6 networks this must be set to
-     * true, otherwise DNS becomes completely unavailable.
+     * IPv6 defaults off to avoid failures on networks with broken IPv6 routing.
+     * Set ENABLE_IPV6 to true when IPv6 is required and working.
      */
-    "ipv6": DISABLE_IPV6,
+    "ipv6": ENABLE_IPV6,
 
     "use-system-hosts": false,
     "cache-algorithm": "arc",
@@ -264,7 +263,7 @@ const ruleProviderCommon = {
 const bm7BaseUrl = "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash";
 
 const ruleProviders = {
-    // ── Advertising & Privacy  (highest priority after domestic & QUIC) ─
+    // ── Advertising & Privacy  (after Steam exceptions and QUIC) ─
     "advertising": {
         ...ruleProviderCommon,
         "url": `${bm7BaseUrl}/Advertising/Advertising.yaml`,
@@ -402,25 +401,6 @@ const ruleProviders = {
 // §4.  Routing Rules  (top → bottom, first match wins)
 // ============================================================
 const rules = [
-
-    /**
-     * ═══════════════════════════════════════════════════════
-     * §4-0.  High-traffic domestic sites — DIRECT (top of chain)
-     * ═══════════════════════════════════════════════════════
-     * Hardcoded DIRECT for the most frequently visited Chinese
-     * domains, skipping ~10 downstream RULE-SET traversals.
-     * These are already mapped to domestic DNS in nameserver-policy.
-     */
-    "DOMAIN-SUFFIX,qq.com,DIRECT",
-    "DOMAIN-SUFFIX,baidu.com,DIRECT",
-    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
-    "DOMAIN-SUFFIX,taobao.com,DIRECT",
-    "DOMAIN-SUFFIX,jd.com,DIRECT",
-    "DOMAIN-SUFFIX,weixin.com,DIRECT",
-    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
-    "DOMAIN-SUFFIX,csdn.net,DIRECT",
-    "DOMAIN-SUFFIX,gitee.com,DIRECT",
-
     /**
      * ═══════════════════════════════════════════════════════
      * §4-1.  QUIC Block — force Google services onto TCP
@@ -436,8 +416,7 @@ const rules = [
      * straight to TCP, saving the timeout delay.
      *
      * Compatibility: AND rules are a Clash Meta extension.  Clash Meta
-     * for Android supports them natively.  Stash (iOS) supports AND +
-     * NETWORK rules since v3.0.2 (April 2025).  Clash Premium does NOT
+     * for Android supports these Mihomo logical rules.
      * support AND rules.
      */
     "AND,((DOMAIN-SUFFIX,googlevideo.com),(NETWORK,UDP)),REJECT",
@@ -460,6 +439,25 @@ const rules = [
      */
     "RULE-SET,advertising,Ad Block,no-resolve",
     "RULE-SET,privacy,Global Block,no-resolve",
+
+
+    /**
+     * ═══════════════════════════════════════════════════════
+     * §4-0.  High-traffic domestic sites — DIRECT (after blocking rules)
+     * ═══════════════════════════════════════════════════════
+     * Hardcoded DIRECT for the most frequently visited Chinese
+     * domains after applying advertising/privacy block rules.
+     * These are already mapped to domestic DNS in nameserver-policy.
+     */
+    "DOMAIN-SUFFIX,qq.com,DIRECT",
+    "DOMAIN-SUFFIX,baidu.com,DIRECT",
+    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
+    "DOMAIN-SUFFIX,taobao.com,DIRECT",
+    "DOMAIN-SUFFIX,jd.com,DIRECT",
+    "DOMAIN-SUFFIX,weixin.com,DIRECT",
+    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
+    "DOMAIN-SUFFIX,csdn.net,DIRECT",
+    "DOMAIN-SUFFIX,gitee.com,DIRECT",
 
     /**
      * ═══════════════════════════════════════════════════════
@@ -524,8 +522,8 @@ const rules = [
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve",  // Netflix, Disney+, … combined
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram uses a dedicated group
-    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram uses a dedicated group
+    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,vk,VK,no-resolve",               // VK uses a dedicated group
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
@@ -534,7 +532,6 @@ const rules = [
     "RULE-SET,github,GitHub,no-resolve",   // GitHub services (github.com, ghcr.io, npm, ...)
 
     // Loyalsoldier proxy list (catch-all for commonly blocked domains)
-    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ═══════════════════════════════════════════════════════
@@ -544,6 +541,9 @@ const rules = [
     "RULE-SET,microsoft,Microsoft Services",
     // BM7 Apple rule set includes Apple CDN; routed via Apple Services group.
     "RULE-SET,apple,Apple Services,no-resolve",
+
+    // General proxy list follows explicit service policies.
+    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ═══════════════════════════════════════════════════════
@@ -729,42 +729,92 @@ function _filterEnabledGroups(groups, enabledSet) {
     }
     return result;
 }
-function main(config) {
-    // Shallow-copy to avoid mutating the caller's reference.
-    config = {
-        ...config,
-        "proxies": [...(config?.proxies || [])],
-        "proxy-groups": [...(config?.["proxy-groups"] || [])]
-    };
+// Copy JSON-like configuration data without sharing mutable caller/template objects.
+function copyConfigData(value, seen = new Map()) {
+    if (value === null || typeof value !== "object") return value;
+    if (seen.has(value)) return seen.get(value);
+    const result = Array.isArray(value) ? [] : {};
+    seen.set(value, result);
+    for (const key of Object.keys(value)) {
+        Object.defineProperty(result, key, {
+            value: copyConfigData(value[key], seen), enumerable: true,
+            writable: true, configurable: true
+        });
+    }
+    return result;
+}
 
-    // Safety check: ensure the subscription contains usable nodes.
-    const proxyCount = config?.proxies?.length ?? 0;
-    const proxyProviderCount =
-        typeof config?.["proxy-providers"] === "object"
-            ? Object.keys(config["proxy-providers"]).length
-            : 0;
-    if (proxyCount === 0 && proxyProviderCount === 0) {
+function prepareConfig(config) {
+    if (!config || typeof config !== "object" || Array.isArray(config)) {
+        throw new Error("Configuration must be a non-null object");
+    }
+    const proxies = config.proxies == null ? [] : config.proxies;
+    if (!Array.isArray(proxies)) throw new Error("proxies must be an array");
+    const providers = config["proxy-providers"] == null ? {} : config["proxy-providers"];
+    if (typeof providers !== "object" || Array.isArray(providers)) {
+        throw new Error("proxy-providers must be an object");
+    }
+    for (const name of Object.keys(providers)) {
+        const provider = providers[name];
+        if (!name.trim() || !provider || typeof provider !== "object" || Array.isArray(provider)) {
+            throw new Error("Invalid proxy-provider definition: " + name);
+        }
+    }
+    const reserved = new Set([
+        "DIRECT", "REJECT", "REJECT-DROP", "PASS", "COMPATIBLE", "GLOBAL",
+        "Select Node", "Fallback", "Others", "HK - 香港", "JP - 日本",
+        "US - 美国", "SG - 新加坡", "TW - 台湾", "Latency Test", "Failover",
+        "Load Balance (Hash)", "Load Balance (Round Robin)", "Google Services",
+        "GitHub", "Foreign Media", "UHD", "Social Media", "Telegram", "Instagram",
+        "VK", "AI Overseas", "OpenCode", "Microsoft Services", "Apple Services",
+        "Steam", "Ad Block", "Global Block"
+    ]);
+    const names = new Set();
+    for (const proxy of proxies) {
+        if (!proxy || typeof proxy !== "object" || Array.isArray(proxy) ||
+            typeof proxy.name !== "string" || !proxy.name.trim()) {
+            throw new Error("Each proxy must have a non-empty string name");
+        }
+        if (names.has(proxy.name)) throw new Error("Duplicate proxy name: " + proxy.name);
+        if (reserved.has(proxy.name)) throw new Error("Proxy name conflicts with a reserved target: " + proxy.name);
+        names.add(proxy.name);
+    }
+    if (proxies.length === 0 && Object.keys(providers).length === 0) {
         throw new Error("No proxies found in configuration file");
     }
+    return { ...config, "proxies": copyConfigData(proxies), "proxy-providers": copyConfigData(providers) };
+}
+
+function main(config) {
+    config = prepareConfig(config);
+
 
     var enabledSet = _buildEnabledSet();
     var fallbackMap = _buildFallbackMap();
 
     // Override the subscription DNS config with our own.
-    config["dns"] = dnsConfig;
+    config["dns"] = copyConfigData(dnsConfig);
+    config["ipv6"] = ENABLE_IPV6;
 
     /**
      * Enable domain sniffing.
      *
-     * Without sniffing, Clash only sees destination IPs when the browser
-     * or app uses HTTPS with encrypted SNI.  This prevents DOMAIN-based
-     * rule matching.
+     * Recover HTTP Host and ordinary TLS SNI for IP-only traffic.
+     * Encrypted ClientHello (ECH) cannot be decrypted by the sniffer.
      *
      * skip-domain entries prevent sniffing from interfering with
      * critical system-level connectivity checks on mobile OSes.
      */
     config["sniffer"] = {
         "enable": true,
+        "force-dns-mapping": true,
+        "parse-pure-ip": true,
+        "override-destination": false,
+        "sniff": {
+            "HTTP": { "ports": [80, "8080-8880"] },
+            "TLS": { "ports": [443, 8443] },
+            "QUIC": { "ports": [443, 8443] }
+        },
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",               // Xiaomi smart home
@@ -797,7 +847,7 @@ function main(config) {
     ];
 
     // 【Mobile】Icon assets for regional groups.
-    // Verified rendering on Clash Meta for Android and Stash.
+    // Verified rendering on Clash Meta for Android.
     const FLAG_ICONS = {
         "HK - 香港": "hk.svg",
         "JP - 日本": "jp.svg",
@@ -1232,8 +1282,11 @@ function main(config) {
     }
 
     config["proxy-groups"] = _filterEnabledGroups(config["proxy-groups"], enabledSet);
-    config["rule-providers"] = ruleProviders;
+    config["rule-providers"] = copyConfigData(ruleProviders);
     config["rules"] = _rewriteRuleTargets(rules, enabledSet, fallbackMap);
+
+    // Each generated group owns its arrays independently.
+    config["proxy-groups"] = config["proxy-groups"].map(group => copyConfigData(group));
 
     return config;
 }

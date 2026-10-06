@@ -1,8 +1,8 @@
 /**
  * Clash Verge Rev — Main Configuration Script (main.js)
  *
- * @version  1.6
- * @date     2026-09-28
+ * @version  1.6.1
+ * @date     2026-10-05
  * @description Injects DNS, routing rules and proxy groups into
  *              Clash Verge Rev, supporting Steam direct-connect,
  *              Microsoft services, ad-blocking, regional routing,
@@ -72,23 +72,24 @@ const DNS_LISTEN   = "0.0.0.0:1053";
 // [2026-06-09 fix] Windows web Apple Music ERR_CONNECTION_CLOSED:
 // browsers issue A + AAAA in parallel for *.apple.com; Akamai v6 edges
 // frequently RST chunk requests, surfacing as ERR_CONNECTION_CLOSED.
-// Mobile script already forces v4-only — align the desktop script.
-const DISABLE_IPV6 = true;
+// Align the mobile DNS IPv4-only default; the client manages top-level IPv6.
+const ENABLE_IPV6 = false; // Controls DNS IPv6; Clash Verge Settings owns top-level ipv6.
 
 const dnsConfig = {
     "enable": true,
     "listen": DNS_LISTEN,
 
     /**
-     * Disable IPv6.
+     * Disable DNS IPv6 resolution by default.
      *
      * IPv6 routing is unreliable on many networks, causing
      * connection timeouts or outright failures.  Dual-stack
      * services (Steam, Apple, etc.) may prefer IPv6 and fail
-     * silently.  Set DISABLE_IPV6 to true on IPv6-only
-     * networks or DNS breaks entirely.
+     * silently. Set ENABLE_IPV6 to true when IPv6 is required and working,
+     * and enable IPv6 in Clash Verge Settings. If client DNS override is enabled,
+     * check whether its settings also take ownership of the final dns.ipv6.
      */
-    "ipv6": DISABLE_IPV6,
+    "ipv6": ENABLE_IPV6,
 
     "use-system-hosts": false,
     "cache-algorithm":  "arc",
@@ -466,25 +467,6 @@ const ruleProviders = {
 //  4.  Routing Rules  (top → bottom, first match wins)
 // ============================================================
 const rules = [
-
-    /**
-     * ═══════════════════════════════════════════════════════════
-     *  4-0  High-traffic domestic sites — DIRECT  (top of chain)
-     * ═══════════════════════════════════════════════════════════
-     * Hardcoded DIRECT for the most frequently visited Chinese
-     * domains, avoiding traversal of ~10 downstream RULE-SETs.
-     * These are already mapped to domestic DNS in nameserver-policy.
-     */
-    "DOMAIN-SUFFIX,qq.com,DIRECT",
-    "DOMAIN-SUFFIX,baidu.com,DIRECT",
-    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
-    "DOMAIN-SUFFIX,taobao.com,DIRECT",
-    "DOMAIN-SUFFIX,jd.com,DIRECT",
-    "DOMAIN-SUFFIX,weixin.com,DIRECT",
-    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
-    "DOMAIN-SUFFIX,csdn.net,DIRECT",
-    "DOMAIN-SUFFIX,gitee.com,DIRECT",
-
     /**
      * ═══════════════════════════════════════════════════════════
      *  4-1  Steam Download — DIRECT  (highest priority after
@@ -572,6 +554,25 @@ const rules = [
     "RULE-SET,advertising,Ad Block,no-resolve",
     "RULE-SET,privacy,Global Block,no-resolve",
 
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     *  4-0  High-traffic domestic sites — DIRECT  (after blocking rules)
+     * ═══════════════════════════════════════════════════════════
+     * Hardcoded DIRECT for the most frequently visited Chinese
+     * domains, avoiding traversal of ~10 downstream RULE-SETs.
+     * These are already mapped to domestic DNS in nameserver-policy.
+     */
+    "DOMAIN-SUFFIX,qq.com,DIRECT",
+    "DOMAIN-SUFFIX,baidu.com,DIRECT",
+    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
+    "DOMAIN-SUFFIX,taobao.com,DIRECT",
+    "DOMAIN-SUFFIX,jd.com,DIRECT",
+    "DOMAIN-SUFFIX,weixin.com,DIRECT",
+    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
+    "DOMAIN-SUFFIX,csdn.net,DIRECT",
+    "DOMAIN-SUFFIX,gitee.com,DIRECT",
+
     /**
      * ═══════════════════════════════════════════════════════════
       *  4-4  Custom Override Rules  (correct rule-set false positives)
@@ -599,7 +600,7 @@ const rules = [
     // Requires TUN mode + find-process-mode: strict (default in Clash Meta/Mihomo).
     "PROCESS-NAME,WinStore.App.exe,DIRECT",
     "PROCESS-NAME,Microsoft.StorePurchaseApp.exe,DIRECT",
-    "PROCESS-NAME,Microsoft.WindowsStore*,DIRECT",
+    "PROCESS-NAME-REGEX,(?i)^Microsoft\\.WindowsStore.*$,DIRECT",
     // ── Microsoft Store / winget CDNs → DIRECT ──────────────────────────
     // REQUIREMENTS for Microsoft Store to work:
     // 1) Enable TUN mode in Clash Verge Rev (Settings → TUN Mode → ON)
@@ -677,8 +678,8 @@ const rules = [
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve",  // Netflix, Disney+, …
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram uses a dedicated group
-    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram uses a dedicated group
+    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,vk,VK,no-resolve",               // VK uses a dedicated group
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
@@ -689,7 +690,6 @@ const rules = [
 
     // Loyalsoldier proxy list (catch-all for commonly blocked
     // domains — GFW list merged in, as overlap was >80%)
-    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ═══════════════════════════════════════════════════════════
@@ -700,6 +700,9 @@ const rules = [
     // the Apple Services proxy group.
     "RULE-SET,apple,Apple Services,no-resolve",
     "RULE-SET,microsoft,Microsoft Services",
+
+    // General proxy list follows explicit service policies.
+    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ═══════════════════════════════════════════════════════════
@@ -777,27 +780,69 @@ const GROUP_TIERS = {
 // ============================================================
 //  6.  Entry Point — Configuration Assembly
 // ============================================================
-function main(config) {
-    // Shallow-copy the input so mutations do not corrupt the
-    // caller's reference.
-    config = {
-        ...config,
-        "proxies":      [...(config?.proxies       || [])],
-        "proxy-groups": [...(config?.["proxy-groups"] || [])]
-    };
+// Copy JSON-like configuration data without sharing mutable caller/template objects.
+function copyConfigData(value, seen = new Map()) {
+    if (value === null || typeof value !== "object") return value;
+    if (seen.has(value)) return seen.get(value);
+    const result = Array.isArray(value) ? [] : {};
+    seen.set(value, result);
+    for (const key of Object.keys(value)) {
+        Object.defineProperty(result, key, {
+            value: copyConfigData(value[key], seen), enumerable: true,
+            writable: true, configurable: true
+        });
+    }
+    return result;
+}
 
-    // Safety check: ensure the subscription has usable nodes.
-    const proxyCount = config?.proxies?.length ?? 0;
-    const proxyProviderCount =
-        typeof config?.["proxy-providers"] === "object"
-            ? Object.keys(config["proxy-providers"]).length
-            : 0;
-    if (proxyCount === 0 && proxyProviderCount === 0) {
+function prepareConfig(config) {
+    if (!config || typeof config !== "object" || Array.isArray(config)) {
+        throw new Error("Configuration must be a non-null object");
+    }
+    const proxies = config.proxies == null ? [] : config.proxies;
+    if (!Array.isArray(proxies)) throw new Error("proxies must be an array");
+    const providers = config["proxy-providers"] == null ? {} : config["proxy-providers"];
+    if (typeof providers !== "object" || Array.isArray(providers)) {
+        throw new Error("proxy-providers must be an object");
+    }
+    for (const name of Object.keys(providers)) {
+        const provider = providers[name];
+        if (!name.trim() || !provider || typeof provider !== "object" || Array.isArray(provider)) {
+            throw new Error("Invalid proxy-provider definition: " + name);
+        }
+    }
+    const reserved = new Set([
+        "DIRECT", "REJECT", "REJECT-DROP", "PASS", "COMPATIBLE", "GLOBAL",
+        "Select Node", "Fallback", "Others", "HK - 香港", "JP - 日本",
+        "US - 美国", "SG - 新加坡", "TW - 台湾", "Latency Test", "Failover",
+        "Load Balance (Hash)", "Load Balance (Round Robin)", "Google Services",
+        "GitHub", "Foreign Media", "UHD", "Social Media", "Telegram", "Instagram",
+        "VK", "AI Overseas", "OpenCode", "Microsoft Services", "Apple Services",
+        "Steam", "Ad Block", "Global Block"
+    ]);
+    const names = new Set();
+    for (const proxy of proxies) {
+        if (!proxy || typeof proxy !== "object" || Array.isArray(proxy) ||
+            typeof proxy.name !== "string" || !proxy.name.trim()) {
+            throw new Error("Each proxy must have a non-empty string name");
+        }
+        if (names.has(proxy.name)) throw new Error("Duplicate proxy name: " + proxy.name);
+        if (reserved.has(proxy.name)) throw new Error("Proxy name conflicts with a reserved target: " + proxy.name);
+        names.add(proxy.name);
+    }
+    if (proxies.length === 0 && Object.keys(providers).length === 0) {
         throw new Error("No proxies found in configuration file");
     }
+    return { ...config, "proxies": copyConfigData(proxies), "proxy-providers": copyConfigData(providers) };
+}
+
+function main(config) {
+    config = prepareConfig(config);
+
 
     // Fully replace the subscription's DNS settings with ours.
-    config["dns"] = dnsConfig;
+    config["dns"] = copyConfigData(dnsConfig);
+    // Preserve input ipv6; Clash Verge discards conflicting writes to app-owned fields.
 
     /**
      * Enable the domain sniffer.
@@ -805,7 +850,7 @@ function main(config) {
      * When a browser enables Secure DNS (DoH), Clash only sees the
      * resolved IP and cannot match DOMAIN rules.  The sniffer
      * inspects TLS SNI / HTTP Host headers to recover the true
-     * domain name.
+     * domain name. Encrypted ClientHello (ECH) cannot be decrypted.
      *
      * msftconnecttest.com is kept in skip-domain to prevent Windows NCSI
      * from breaking due to fake-ip.  microsoft.com has been removed because
@@ -815,6 +860,14 @@ function main(config) {
      */
     config["sniffer"] = {
         "enable":       true,
+        "force-dns-mapping": true,
+        "parse-pure-ip": true,
+        "override-destination": false,
+        "sniff": {
+            "HTTP": { "ports": [80, "8080-8880"] },
+            "TLS": { "ports": [443, 8443] },
+            "QUIC": { "ports": [443, 8443] }
+        },
         "force-domain": ["+.*"],
         "skip-domain":  [
             "+.mijia.cloud",
@@ -1267,9 +1320,12 @@ function main(config) {
 
     // Write rule providers and rules into the config, replacing the
     // subscription's originals.
-    config["rule-providers"] = ruleProviders;
-    config["rules"]           = rules;
+    config["rule-providers"] = copyConfigData(ruleProviders);
+    config["rules"] = [...rules];
 
     // Return the final config to be used by Clash Verge Rev.
+    // Each generated group owns its arrays independently.
+    config["proxy-groups"] = config["proxy-groups"].map(group => copyConfigData(group));
+
     return config;
 }

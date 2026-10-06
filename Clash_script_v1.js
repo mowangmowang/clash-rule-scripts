@@ -1,8 +1,8 @@
 /**
  * Clash Verge Rev - 主配置脚本 (main.js)
  *
- * @version 1.6
- * @date 2026-09-28
+ * @version 1.6.1
+ * @date 2026-10-05
  * @description 为 Clash Verge Rev 注入 DNS、路由规则与代理组，实现 Steam 直连、Microsoft 服务支持、广告拦截、地域分流，以及 Telegram / Instagram / UHD 专用分组。
  * 【工作原理】
  * 本文件是一个 JavaScript 预处理脚本，由 Clash Verge Rev 的「配置预处理」功能调用。
@@ -54,20 +54,21 @@ const foreignNameservers = [
 const DNS_LISTEN = "0.0.0.0:1053";
 // 【2026-06-09 修复】Windows Web 端 Apple Music 报 ERR_CONNECTION_CLOSED：
 // 浏览器对 *.apple.com 同时发起 A + AAAA 解析，Akamai v6 边缘对 chunk 请求经常 RST，
-// 表现即 ERR_CONNECTION_CLOSED。Mobile 脚本已强制 v4-only，对齐之。
-const DISABLE_IPV6 = true;
+// 表现即 ERR_CONNECTION_CLOSED。默认 DNS IPv4-only 与 Mobile 对齐，顶层开关由客户端管理。
+const ENABLE_IPV6 = false; // 控制 DNS IPv6；顶层 ipv6 由 Clash Verge 设置管理。
 
 const dnsConfig = {
     "enable": true,
     "listen": DNS_LISTEN,
 
     /**
-     * 【关键】禁用 IPv6
+     * 【关键】默认禁用 DNS IPv6 解析
      * 原因：部分网络环境 IPv6 路由不稳定，会导致连接超时或失败。
      * Steam、Apple 等服务在双栈环境下可能优先尝试 IPv6 而失败。
-     * 注意：纯 IPv6 网络环境需改为 true，否则 DNS 完全不可用。
+     * 需要 IPv6 的网络可将 ENABLE_IPV6 设为 true，并在 Clash Verge 设置中开启 IPv6。
+     * 若启用客户端 DNS 覆写，需同时核对最终 dns.ipv6 是否被客户端设置接管。
      */
-    "ipv6": DISABLE_IPV6,
+    "ipv6": ENABLE_IPV6,
 
     "use-system-hosts": false,
     "cache-algorithm": "arc",
@@ -406,27 +407,9 @@ const ruleProviders = {
 // § 4. 路由规则列表（从上到下，第一个命中即停止）
 // ============================================================
 const rules = [
-
     /**
      * ══════════════════════════════════════════════════════
-     * § 4-0. 高频国内服务直连（规则链最顶部，减少后续规则集遍历）
-     * ══════════════════════════════════════════════════════
-     * 国内流量占比最高的域名硬编码为 DIRECT，跳过后续 ~10 条 RULE-SET 匹配开销。
-     * 这些域名已同步加入 nameserver-policy 确保国内 DNS 解析。
-     */
-    "DOMAIN-SUFFIX,qq.com,DIRECT",
-    "DOMAIN-SUFFIX,baidu.com,DIRECT",
-    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
-    "DOMAIN-SUFFIX,taobao.com,DIRECT",
-    "DOMAIN-SUFFIX,jd.com,DIRECT",
-    "DOMAIN-SUFFIX,weixin.com,DIRECT",
-    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
-    "DOMAIN-SUFFIX,csdn.net,DIRECT",
-    "DOMAIN-SUFFIX,gitee.com,DIRECT",
-
-    /**
-     * ══════════════════════════════════════════════════════
-     * § 4-1. Steam 下载直连（仅次于国内高频域名，在所有规则集之前）
+     * § 4-1. Steam 下载直连（在所有规则集之前）
      * ══════════════════════════════════════════════════════
      *
      * 【为什么必须放在最顶部？】
@@ -502,6 +485,24 @@ const rules = [
     "RULE-SET,advertising,Ad Block,no-resolve",
     "RULE-SET,privacy,Global Block,no-resolve",
 
+
+    /**
+     * ══════════════════════════════════════════════════════
+     * § 4-0. 高频国内服务直连（拦截规则之后）
+     * ══════════════════════════════════════════════════════
+     * 国内常用域名直连，但必须先通过广告 / 隐私拦截。
+     * 这些域名已同步加入 nameserver-policy 确保国内 DNS 解析。
+     */
+    "DOMAIN-SUFFIX,qq.com,DIRECT",
+    "DOMAIN-SUFFIX,baidu.com,DIRECT",
+    "DOMAIN-SUFFIX,bdstatic.com,DIRECT",
+    "DOMAIN-SUFFIX,taobao.com,DIRECT",
+    "DOMAIN-SUFFIX,jd.com,DIRECT",
+    "DOMAIN-SUFFIX,weixin.com,DIRECT",
+    "DOMAIN-SUFFIX,zhihu.com,DIRECT",
+    "DOMAIN-SUFFIX,csdn.net,DIRECT",
+    "DOMAIN-SUFFIX,gitee.com,DIRECT",
+
     /**
      * ══════════════════════════════════════════════════════
      * § 4-4. 自定义修正规则（处理规则集的误判）
@@ -528,7 +529,7 @@ const rules = [
     // 需 TUN 模式 + find-process-mode: strict（Clash Meta/Mihomo 默认 strict）。
     "PROCESS-NAME,WinStore.App.exe,DIRECT",
     "PROCESS-NAME,Microsoft.StorePurchaseApp.exe,DIRECT",
-    "PROCESS-NAME,Microsoft.WindowsStore*,DIRECT",
+    "PROCESS-NAME-REGEX,(?i)^Microsoft\\.WindowsStore.*$,DIRECT",
     // ── Microsoft Store / winget CDN → DIRECT ─────────────────────────────
     // 【必读】TUN 模式 + UWP 流程：
     // 1) 开启 Clash Verge Rev 的 TUN 模式（设置 → TUN 模式 → 开启）
@@ -598,8 +599,8 @@ const rules = [
     "RULE-SET,tiktok,Foreign Media,no-resolve",
     "RULE-SET,global_media,Foreign Media,no-resolve", // Netflix、Disney+ 等境外流媒体合集
     "RULE-SET,telegram,Telegram,no-resolve",   // Telegram 独立分流
-    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,instagram,Instagram,no-resolve", // Instagram 独立分流
+    "RULE-SET,facebook,Social Media,no-resolve",
     "RULE-SET,vk,VK,no-resolve",               // VK 独立分流（社交 / 视频 / VK Play）
     "RULE-SET,twitter,Social Media,no-resolve",
     "RULE-SET,whatsapp,Social Media,no-resolve",
@@ -609,7 +610,6 @@ const rules = [
     "RULE-SET,github,GitHub,no-resolve",   // GitHub 系服务独立分流（github.com / ghcr.io / npm 等）
 
     // Loyalsoldier 代理列表（兜底覆盖常见被墙域名，已合并原 gfw 规则集）
-    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ══════════════════════════════════════════════════════
@@ -619,6 +619,9 @@ const rules = [
     // BM7 Apple 规则集包含 Apple CDN，交给 Apple Services 组统一调度
     "RULE-SET,apple,Apple Services,no-resolve",
     "RULE-SET,microsoft,Microsoft Services",
+
+    // General proxy list follows explicit service policies.
+    "RULE-SET,proxy,Select Node,no-resolve",
 
     /**
      * ══════════════════════════════════════════════════════
@@ -687,34 +690,85 @@ const GROUP_TIERS = {
 // ============================================================
 // § 6. 程序入口 - 配置组装
 // ============================================================
-function main(config) {
-    // 浅拷贝输入，避免原地修改污染调用方持有的引用
-    config = {
-        ...config,
-        "proxies": [...(config?.proxies || [])],
-        "proxy-groups": [...(config?.["proxy-groups"] || [])]
-    };
+// Copy JSON-like configuration data without sharing mutable caller/template objects.
+function copyConfigData(value, seen = new Map()) {
+    if (value === null || typeof value !== "object") return value;
+    if (seen.has(value)) return seen.get(value);
+    const result = Array.isArray(value) ? [] : {};
+    seen.set(value, result);
+    for (const key of Object.keys(value)) {
+        Object.defineProperty(result, key, {
+            value: copyConfigData(value[key], seen), enumerable: true,
+            writable: true, configurable: true
+        });
+    }
+    return result;
+}
 
-    // 安全检查：确保订阅源中有可用节点
-    const proxyCount = config?.proxies?.length ?? 0;
-    const proxyProviderCount =
-        typeof config?.["proxy-providers"] === "object"
-            ? Object.keys(config["proxy-providers"]).length
-            : 0;
-    if (proxyCount === 0 && proxyProviderCount === 0) {
+function prepareConfig(config) {
+    if (!config || typeof config !== "object" || Array.isArray(config)) {
+        throw new Error("Configuration must be a non-null object");
+    }
+    const proxies = config.proxies == null ? [] : config.proxies;
+    if (!Array.isArray(proxies)) throw new Error("proxies must be an array");
+    const providers = config["proxy-providers"] == null ? {} : config["proxy-providers"];
+    if (typeof providers !== "object" || Array.isArray(providers)) {
+        throw new Error("proxy-providers must be an object");
+    }
+    for (const name of Object.keys(providers)) {
+        const provider = providers[name];
+        if (!name.trim() || !provider || typeof provider !== "object" || Array.isArray(provider)) {
+            throw new Error("Invalid proxy-provider definition: " + name);
+        }
+    }
+    const reserved = new Set([
+        "DIRECT", "REJECT", "REJECT-DROP", "PASS", "COMPATIBLE", "GLOBAL",
+        "Select Node", "Fallback", "Others", "HK - 香港", "JP - 日本",
+        "US - 美国", "SG - 新加坡", "TW - 台湾", "Latency Test", "Failover",
+        "Load Balance (Hash)", "Load Balance (Round Robin)", "Google Services",
+        "GitHub", "Foreign Media", "UHD", "Social Media", "Telegram", "Instagram",
+        "VK", "AI Overseas", "OpenCode", "Microsoft Services", "Apple Services",
+        "Steam", "Ad Block", "Global Block"
+    ]);
+    const names = new Set();
+    for (const proxy of proxies) {
+        if (!proxy || typeof proxy !== "object" || Array.isArray(proxy) ||
+            typeof proxy.name !== "string" || !proxy.name.trim()) {
+            throw new Error("Each proxy must have a non-empty string name");
+        }
+        if (names.has(proxy.name)) throw new Error("Duplicate proxy name: " + proxy.name);
+        if (reserved.has(proxy.name)) throw new Error("Proxy name conflicts with a reserved target: " + proxy.name);
+        names.add(proxy.name);
+    }
+    if (proxies.length === 0 && Object.keys(providers).length === 0) {
         throw new Error("No proxies found in configuration file");
     }
+    return { ...config, "proxies": copyConfigData(proxies), "proxy-providers": copyConfigData(providers) };
+}
+
+function main(config) {
+    config = prepareConfig(config);
+
 
     // 用本脚本的 DNS 配置完整覆盖订阅源的 DNS 设置
-    config["dns"] = dnsConfig;
+    config["dns"] = copyConfigData(dnsConfig);
+    // 保留输入的顶层 ipv6；Clash Verge 会丢弃脚本对应用管理字段的冲突写入。
 
     // 【新增】开启 sniffer 域名嗅探
-    // 解决浏览器开启安全 DNS (DoH) 时，Clash 只能获取到目标 IP 而无法匹配 DOMAIN 规则的问题
+    // 恢复纯 IP 流量的 HTTP Host / 普通 TLS SNI；不能解密 ECH。
     // 【注意】保留 msftconnecttest.com 是为了防止 Windows NCSI 因 fake-ip 异常。
     // microsoft.com 已移除：Store 用 WebView 渲染，skip 会阻止 sniffer 识别真实 SNI 域名，
     // 导致 DOMAIN 规则无法正确匹配。msftncsi.com 仍在 fake-ip-filter 中保护 NCSI。
     config["sniffer"] = {
         "enable": true,
+        "force-dns-mapping": true,
+        "parse-pure-ip": true,
+        "override-destination": false,
+        "sniff": {
+            "HTTP": { "ports": [80, "8080-8880"] },
+            "TLS": { "ports": [443, 8443] },
+            "QUIC": { "ports": [443, 8443] }
+        },
         "force-domain": ["+.*"],
         "skip-domain": [
             "+.mijia.cloud",
@@ -1114,9 +1168,12 @@ function main(config) {
 
 
     // 将规则集和规则写入配置，覆盖订阅源原有的规则
-    config["rule-providers"] = ruleProviders;
-    config["rules"] = rules;
+    config["rule-providers"] = copyConfigData(ruleProviders);
+    config["rules"] = [...rules];
 
     // 返回最终配置，Clash Verge Rev 将使用此配置启动
+    // Each generated group owns its arrays independently.
+    config["proxy-groups"] = config["proxy-groups"].map(group => copyConfigData(group));
+
     return config;
 }

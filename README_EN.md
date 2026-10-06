@@ -2,8 +2,8 @@
 
 > Clash config preprocessing scripts — inject DNS, routing rules and proxy groups so fake-ip mode works flawlessly with Steam downloads and more.
 
-[![desktop-v1.6](https://img.shields.io/badge/desktop-v1.6-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.6)
-[![mobile-v1.6](https://img.shields.io/badge/mobile-v1.6-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.6)
+[![desktop-v1.6.1](https://img.shields.io/badge/desktop-v1.6.1-236ad3?style=flat-square&logo=github)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.6.1)
+[![mobile-v1.6.1](https://img.shields.io/badge/mobile-v1.6.1-00b4d8?style=flat-square&logo=android)](https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.6.1)
 [![license](https://img.shields.io/github/license/mowangmowang/clash-rule-scripts?style=flat-square)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android%20%7C%20iOS-555?style=flat-square)](.)
 
@@ -26,7 +26,7 @@
 ## 🚀 Usage
 
 > [!IMPORTANT]
-> ⚠️ This script is intended to **override an airport-provided subscription config**; it is not recommended for overriding a hand-written config. The script runs `main(config)` after the subscription loads, enhancing DNS / routing / proxy groups in place. Custom rules survive subscription updates because they are injected at runtime, not written into the subscription YAML.
+> ⚠️ This script is intended to **override an airport-provided subscription config**; it is not recommended for overriding a hand-written config. The script runs `main(config)` after the subscription loads and returns the enhanced DNS / routing / proxy-group configuration. Custom rules survive subscription updates because they are injected at runtime, not written into the subscription YAML.
 
 ### 1. Pick a script
 
@@ -34,8 +34,8 @@
 |--------|--------|----------|
 | `Clash_script_v1.js` | Clash Verge Rev (Windows / macOS / Linux) | Chinese |
 | `Clash_script_v1_en.js` | Clash Verge Rev (Windows / macOS / Linux) | English |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash (iOS) | Chinese |
-| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta / Stash | English, with visual group toggles |
+| `Clash_script_mobile.js` | Clash Meta for Android | Chinese |
+| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta | English, with visual group toggles |
 
 The desktop CN and EN builds are functionally identical — pick either. The Bettbox build additionally adds per-group panel toggles and a fallback chain; see [Proxy Group Structure](#proxy-group-structure).
 
@@ -50,10 +50,10 @@ https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/Clash_script
 https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@main/ClashScript_ForBettbox.js
 ```
 
-**Pin a version (replace `@main` with a tag such as `@desktop-v1.6` to opt out of auto-updates):**
+**Pin a version (replace `@main` with a tag such as `@desktop-v1.6.1` to opt out of auto-updates):**
 
 ```txt
-https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.6/Clash_script_v1.js
+https://fastly.jsdelivr.net/gh/mowangmowang/clash-rule-scripts@desktop-v1.6.1/Clash_script_v1.js
 ```
 
 **GitHub raw link (fallback if the CDN is unavailable):**
@@ -78,11 +78,7 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 2. Create a new override and paste the script link or code
 3. Reload your config
 
-**Stash (iOS):**
-
-1. Settings → Override Script
-2. Paste the script link or code
-3. Reload your config
+**Stash:** These JavaScript files use the `main(config)` preprocessing interface and cannot be imported directly as Stash YAML `.stoverride` files. A Stash adapter is not provided.
 
 **Bettbox (FlClash core):**
 
@@ -96,8 +92,8 @@ https://raw.githubusercontent.com/mowangmowang/clash-rule-scripts/main/Clash_scr
 |------|--------|----------|---------|--------|
 | `Clash_script_v1.js` | Clash Verge Rev | Chinese | ✅ | — |
 | `Clash_script_v1_en.js` | Clash Verge Rev | English | ✅ | — |
-| `Clash_script_mobile.js` | Clash Meta for Android / Stash | Chinese | — | ✅ |
-| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta / Stash | English | — | ✅ (visual toggles) |
+| `Clash_script_mobile.js` | Clash Meta for Android | Chinese | — | ✅ |
+| `ClashScript_ForBettbox.js` | Bettbox (FlClash core) / Clash Meta | English | — | ✅ (visual toggles) |
 
 Desktop CN and EN versions are **functionally identical**; any modification must be synced across both. `ClashScript_ForBettbox.js` extends the mobile build with per-group toggles and a fallback chain. File names `_v1` / `_mobile` are series code names and do not change with minor versions — versioning is tracked via [CHANGELOG.md](CHANGELOG.md) + git tags. Desktop and mobile are independent release lines.
 
@@ -155,10 +151,11 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 |----------|-----------------|---------------|
 | `domesticNameservers` | Domestic DNS (CN domains) | Faster DoH, e.g. `https://1.12.12.12/dns-query` |
 | `foreignNameservers` | Overseas DNS | Cloudflare / Google |
+| `ENABLE_IPV6` | DNS IPv6 on desktop; both DNS and top-level IPv6 on mobile/Bettbox | Default `false`; adjust desktop top-level IPv6 in Settings → Clash Settings → IPv6 |
 | `steamCDN` list | Steam CDN domains (direct-connect) | Add newly discovered CDNs |
 | `proxyGroups` | Proxy group definitions | Rename / change selection strategy |
-| `healthCheck.interval` | Node health-check interval | Increase on mobile for battery |
-| `healthCheck.tolerance` | Latency tolerance | 50 ms for cellular networks |
+| `HEALTH_CHECK_INTERVAL / GROUP_TIERS` | Node health-check interval | Increase on mobile for battery |
+| `Latency Test.tolerance` | Latency tolerance | 50 ms for cellular networks |
 | `ruleOptionsEnable` (Bettbox) | Whether each group is enabled in the panel | Set `false` to disable; rules auto-fallback |
 | `serviceConfigs` (Bettbox) | Fallback target when a group is disabled | Edit the `fallback` field to rewire the chain |
 
@@ -174,9 +171,10 @@ Open any JS file — the top section contains "constants". Edit and save to appl
 | Steam download 0 bps | Incorrect nameserver-policy order | Ensure `steamCDN` entries precede `geosite:geolocation-!cn` |
 | Steam download goes through proxy | Steam CDN in fake-ip-filter | Review the `fake-ip-filter` list |
 | Domestic sites resolve to foreign IPs | Domestic DNS unreachable | Test `domesticNameservers` DoH endpoints |
-| Mobile node latency spikes | Tolerance too tight | Set `healthCheck.tolerance` to 50+ ms |
+| Mobile node latency spikes | Tolerance too tight | Set `Latency Test.tolerance` to 50+ ms |
 | Log error `main is not defined` | JS preprocessing not enabled | Enable Script in profile settings |
-| Clash Verge syntax error | File saved with CRLF | Repo enforces LF; configure your editor to save as LF |
+| Warning that an `ipv6` write was discarded | Clash Verge owns top-level IPv6 | Use the corrected desktop script and change the Clash Settings switch; DNS override has a separate IPv6 setting, so inspect final configuration |
+| Clash Verge syntax error | Syntax or client interface incompatibility | Inspect the error; CRLF is valid JavaScript, while this repo standardizes LF |
 | A group is missing from the Bettbox panel | Its toggle is off | Check `ruleOptionsEnable` and ensure the entry is `true` |
 | Rules error / dangling after disabling a group | Fallback chain unset | Ensure `serviceConfigs` has a `fallback` pointing to an always-enabled group |
 
@@ -212,7 +210,7 @@ flowchart LR
 | ① DNS | Other domains → overseas DoH (Cloudflare / OpenDNS / Mullvad) or fallback verification |
 | ② Rules | First match wins: Steam CDN → DIRECT / QUIC block → REJECT / … |
 | ② Rules | Functional group exact match → Apple / Google / AI / OpenCode / Steam |
-| ② Rules | `RULE-SET,proxy` + `MATCH` fallback → `Select Node` |
+| ② Rules | `RULE-SET,proxy` → `Select Node`; `MATCH` → `Fallback` |
 | ③ Dispatch | All groups converge on the node pool, selected via url-test / fallback / load-balance |
 
 </details>
@@ -241,3 +239,9 @@ This project references the following third-party open-source resources:
 ## License
 
 [MIT](./LICENSE)
+
+## Verification and releases
+
+Run `node --test`, `node tools/core-check.cjs`, and `node tools/provider-check.cjs`. Runtime scripts have no npm dependencies; the Node tools are for development and CI only.
+
+Use a `fix/*` branch and PR to merge changes into main. The `required-ci` check must pass. After real client acceptance, manually dispatch `release.yml`. See the [release guide](docs/RELEASING.md) for the process and evidence format.

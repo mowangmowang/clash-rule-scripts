@@ -10,6 +10,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Mobile release line
 
+### [mobile-v1.6.1] - 2026-10-05
+
+#### Fixed
+
+- Disable IPv6 by default in both top-level and DNS configuration using
+  `ENABLE_IPV6`; repair the inverted setting and remove misleading comments.
+- Configure HTTP/TLS/QUIC sniffer protocols and ports, DNS mapping and pure-IP
+  parsing explicitly while keeping destination override disabled and platform
+  skip domains. Sniffing does not decrypt ECH.
+- Match Instagram before Facebook, Apple/Microsoft before the generic proxy
+  set, and advertising/privacy before broad domestic DIRECT suffixes.
+- Reject null/array configurations, invalid source types, empty/duplicate node
+  names and generated-group/built-in target collisions with clear errors.
+  Allow valid provider-only subscriptions and normalize absent/null source fields.
+- Copy script-owned DNS/providers/rules, node data and each group's proxy arrays
+  so changes to one output cannot contaminate inputs, other groups or later calls.
+- Correct Stash compatibility, real health-check constant names, Fallback/MATCH
+  documentation and CRLF troubleshooting. Current JS requires a compatible
+  `main(config)` preprocessing interface and supported Mihomo fields.
+
+#### Changed
+
+- Add behavioral regression tests, fixed upstream overlap fixtures with source
+  commits, and locked/checksummed Mihomo v1.19.15 configuration validation.
+- Require fix branches, PRs, the `required-ci` check and recorded actual client
+  acceptance. Add guarded manual Actions publication with atomic annotated tags,
+  checksummed Release assets and safe recovery of partially published Releases.
+- Keep the v1.6 SpanishDict rule and corrected `Whatsapp/Whatsapp.yaml` URL.
+
+- Preserve mobile icons and existing Bettbox 24 group switches/fallback chains;
+  cover 834 combinations across inline, single-region and provider-only inputs.
+
 ### [mobile-v1.6] - 2026-09-28
 
 ### Added
@@ -213,6 +245,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > into parity.
 
 ## Desktop release line
+
+### [desktop-v1.6.1] - 2026-10-05
+
+#### Fixed
+
+- Disable DNS IPv6 by default using `ENABLE_IPV6`; repair the inverted setting.
+  Preserve the input's top-level `ipv6`, including absence, because Clash Verge
+  v2.5.6 Settings owns it and discards conflicting script writes. Document the
+  separate application and DNS switches and verify final runtime settings.
+- Configure HTTP/TLS/QUIC sniffer protocols and ports, DNS mapping and pure-IP
+  parsing explicitly while keeping destination override disabled and platform
+  skip domains. Sniffing does not decrypt ECH.
+- Match Instagram before Facebook, Apple/Microsoft before the generic proxy
+  set, and advertising/privacy before broad domestic DIRECT suffixes.
+- Reject null/array configurations, invalid source types, empty/duplicate node
+  names and generated-group/built-in target collisions with clear errors.
+  Allow valid provider-only subscriptions and normalize absent/null source fields.
+- Copy script-owned DNS/providers/rules, node data and each group's proxy arrays
+  so changes to one output cannot contaminate inputs, other groups or later calls.
+- Correct Stash compatibility, real health-check constant names, Fallback/MATCH
+  documentation and CRLF troubleshooting. Current JS requires a compatible
+  `main(config)` preprocessing interface and supported Mihomo fields.
+
+#### Changed
+
+- Add behavioral regression tests, fixed upstream overlap fixtures with source
+  commits, and locked/checksummed Mihomo v1.19.15 configuration validation.
+- Require fix branches, PRs, the `required-ci` check and recorded actual client
+  acceptance. Add guarded manual Actions publication with atomic annotated tags,
+  checksummed Release assets and safe recovery of partially published Releases.
+- Keep the v1.6 SpanishDict rule and corrected `Whatsapp/Whatsapp.yaml` URL.
+
+- Replace the ineffective Windows Store wildcard process rule with an anchored,
+  case-insensitive `PROCESS-NAME-REGEX` rule; retain exact process exceptions.
+- Preserve Steam download DIRECT exceptions ahead of blocking rules and keep
+  Chinese/English generated configurations identical.
 
 ### [desktop-v1.6] - 2026-09-28
 
@@ -446,7 +514,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UDP loss surfaced as `ERR_CONNECTION_CLOSED` for every chunk). Now
   blocked by `AND,((DOMAIN-SUFFIX,*.apple.com),(NETWORK,UDP)),REJECT`.
 
-[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.6...HEAD
+[Unreleased]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.6.1...HEAD
+[mobile-v1.6.1]: https://github.com/mowangmowang/clash-rule-scripts/compare/mobile-v1.6...mobile-v1.6.1
 [mobile-v1.6]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.6
 [mobile-v1.5]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.5
 [mobile-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.4
@@ -454,6 +523,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [mobile-v1.2]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.2
 [mobile-v1.1]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.1
 [mobile-v1.0]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/mobile-v1.0
+[desktop-v1.6.1]: https://github.com/mowangmowang/clash-rule-scripts/compare/desktop-v1.6...desktop-v1.6.1
 [desktop-v1.6]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.6
 [desktop-v1.5]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.5
 [desktop-v1.4]: https://github.com/mowangmowang/clash-rule-scripts/releases/tag/desktop-v1.4

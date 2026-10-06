@@ -30,6 +30,8 @@ $RECYCLE.BIN/
 #  tends to leak these into repos if tooling is ever added)
 # ─────────────────────────────────────────────────────────────
 node_modules/
+reports/
+release-artifacts/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml

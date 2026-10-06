@@ -3,6 +3,7 @@
 # repository stores a single canonical newline (LF) regardless of the
 # editor's platform default.
 *.js   text eol=lf
+*.cjs  text eol=lf
 *.md   text eol=lf
 *.json text eol=lf
 *.yaml text eol=lf

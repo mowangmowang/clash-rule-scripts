@@ -1,0 +1,14 @@
+{
+  "mihomo": {
+    "version": "v1.19.15",
+    "linux": {"url": "https://github.com/MetaCubeX/mihomo/releases/download/v1.19.15/mihomo-linux-amd64-v1-v1.19.15.gz", "sha256": "c52a766af250f789fa8e979f8c6a1c279a526bf2c7dd5d6aaedef74db2f8f366"},
+    "win32": {"url": "https://github.com/MetaCubeX/mihomo/releases/download/v1.19.15/mihomo-windows-amd64-v1-v1.19.15.zip", "sha256": "ffe15b6997ec60248a151afaab9e5aeb712f3488599326de5514f59d5dff998c"}
+  },
+  "geodata": {
+    "commit": "f7c0420cdf589312aaf82cf51e061703d2621bca",
+    "files": {
+      "geosite.dat": "79e7a395c57da61aeb3f68db01121c1a0730ab2bd1c8bbe4c0c327786e225134",
+      "country.mmdb": "b13f10cdb414b8db78a64c432d6cd511668415760ee0fb2d17ac9f42de5aba08"
+    }
+  }
+}

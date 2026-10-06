@@ -1,0 +1,61 @@
+name: Reusable verification
+
+on:
+  workflow_call:
+    inputs:
+      target_sha:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    name: syntax-format-behavior
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.target_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+      - name: Syntax and format
+        run: |
+          for f in Clash*.js tools/*.cjs tests/*.cjs; do node --check "$f"; done
+          git show --format= --check HEAD
+          node -e 'const fs=require("fs"); for(const f of fs.readdirSync(".").filter(f=>/^Clash.*\.js$/.test(f))) if(fs.readFileSync(f,"utf8").includes("\r")) throw Error("Non-LF: "+f)'
+      - name: Behavior and release guards
+        run: |
+          mkdir -p reports
+          set -o pipefail
+          node --test tests/*.test.cjs 2>&1 | tee reports/regression.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: regression-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/
+          retention-days: 14
+  core:
+    name: locked-mihomo-config
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.target_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+      - run: node tools/core-check.cjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: native-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/
+          retention-days: 14
