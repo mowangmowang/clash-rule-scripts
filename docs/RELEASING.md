@@ -149,6 +149,10 @@ main. `@main` links update when the PR merges, before version publication.
 - Draft releases are found through the paginated release list and refreshed by
   release ID. The tag lookup endpoint only supports published releases; do not use
   it to read a newly created draft. Duplicate releases for a tag stop publication.
+  New drafts use the creation response's ID directly; uploads and publication
+  also address that ID, avoiding immediate tag/list lookups before indexing is
+  complete. A failed creation request is not blindly retried because it may have
+  already created the draft; inspect existing releases before resuming.
   [GitHub release API](https://docs.github.com/en/rest/releases/releases)
 - If publication tooling itself needs repair, use a new fix branch and PR, wait
   for its main CI, then resume from the current main workflow with the original
