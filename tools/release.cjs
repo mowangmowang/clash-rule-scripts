@@ -22,6 +22,45 @@ function api(endpoint) { return JSON.parse(command('gh', ['api', endpoint])); }
 function maybeApi(endpoint) {
     try { return api(endpoint); } catch (error) { if (/HTTP 404/.test(error.message)) return null; throw error; }
 }
+function findRelease(repo, tag) {
+    // The tag endpoint only returns published releases. List also includes drafts
+    // for a writer; scan every page and reject ambiguous duplicate drafts.
+    let release = null;
+    for (let page = 1; ; page++) {
+        const items = api(`repos/${repo}/releases?per_page=100&page=${page}`);
+        for (const item of items.filter(item => item.tag_name === tag)) {
+            ensure(!release, `Duplicate releases for tag: ${tag}`);
+            release = item;
+        }
+        if (items.length < 100) return release;
+    }
+}
+function targetFileHash(sha, file) {
+    const result = spawnSync('git', ['show', `${sha}:${file}`], { cwd: root, timeout: 120000, windowsHide: true });
+    ensure(!result.error && result.status === 0, `Cannot read target script: ${file}`);
+    return hash(result.stdout);
+}
+function validateTarget(options) {
+    const mainSha = command('git', ['rev-parse', 'origin/main']);
+    ensure(command('git', ['rev-parse', 'HEAD']) === mainSha, 'Dispatch tooling commit is no longer current main');
+    const hashes = scriptHashes(options.version);
+    if (mainSha !== options.sha) {
+        ensure(options.resume, 'target_sha is no longer current main');
+        command('git', ['merge-base', '--is-ancestor', options.sha, mainSha]);
+        for (const [index, line] of ['desktop', 'mobile'].entries()) {
+            const tag = `${line}-v${options.version}`;
+            validateTag(tag, api(`repos/${options.repo}/git/ref/tags/${tag}`), options, index === 0 ? 'Desktop' : 'Mobile');
+        }
+        for (const file of scripts) ensure(hashes[file] === targetFileHash(options.sha, file), `Resume script differs from immutable target: ${file}`);
+    }
+    return { mainSha, hashes };
+}
+function successfulMainCI(repo, sha) {
+    const runs = api(`repos/${repo}/actions/workflows/syntax-check.yml/runs?branch=main&event=push&head_sha=${sha}&per_page=100`).workflow_runs;
+    const run = runs.filter(item => item.head_sha === sha).sort((a, b) => b.id - a.id)[0];
+    ensure(run && run.status === 'completed' && run.conclusion === 'success', 'Latest main CI at target/tooling SHA must pass');
+    return run.html_url;
+}
 function inputs(env = process.env) {
     ensure(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(env.RELEASE_VERSION || ''), 'Version must be full stable semver');
     ensure(/^[a-f0-9]{40}$/.test(env.TARGET_SHA || ''), 'target_sha must be a full commit SHA');
@@ -67,9 +106,7 @@ function scriptHashes(version) {
 }
 function preflight(options) {
     command('git', ['fetch', 'origin', 'main', '--tags']);
-    ensure(command('git', ['rev-parse', 'origin/main']) === options.sha, 'target_sha is no longer current main');
-    ensure(command('git', ['rev-parse', 'HEAD']) === options.sha, 'Checked-out commit differs from target');
-    const hashes = scriptHashes(options.version);
+    const { mainSha, hashes } = validateTarget(options);
     const location = evidenceLocation(options.evidenceUrl, options.repo);
     const comment = api(`repos/${options.repo}/issues/comments/${location.comment}`);
     ensure(comment.issue_url.endsWith(`/issues/${location.pr}`), 'Comment belongs to a different PR');
@@ -79,11 +116,10 @@ function preflight(options) {
     const pr = api(`repos/${options.repo}/pulls/${location.pr}`);
     ensure(pr.merged && pr.base.ref === 'main' && pr.base.repo.full_name === options.repo &&
         pr.merge_commit_sha === options.sha, 'Acceptance PR must be merged into this exact main commit');
-    const runs = api(`repos/${options.repo}/actions/workflows/syntax-check.yml/runs?branch=main&event=push&head_sha=${options.sha}&per_page=100`).workflow_runs;
     // A later failed rerun must not be hidden by an older successful run.
-    const run = runs.filter(item => item.head_sha === options.sha).sort((a, b) => b.id - a.id)[0];
-    ensure(run && run.status === 'completed' && run.conclusion === 'success', 'Latest main CI at target SHA must pass');
-    return { ...options, hashes, validationUrl: run.html_url,
+    const validationUrl = successfulMainCI(options.repo, options.sha);
+    const toolingValidationUrl = mainSha === options.sha ? validationUrl : successfulMainCI(options.repo, mainSha);
+    return { ...options, mainSha, hashes, validationUrl, toolingValidationUrl,
         releaseRun: process.env.GITHUB_RUN_ID ? `https://github.com/${options.repo}/actions/runs/${process.env.GITHUB_RUN_ID}` : null };
 }
 function packageRelease(manifest) {
@@ -152,7 +188,7 @@ function publish(options) {
     const manifest = JSON.parse(fs.readFileSync(path.join(root, 'release-artifacts', 'manifest.json'), 'utf8'));
     const fresh = preflight(options); // Recheck main and real acceptance immediately before tagging.
     ensure(manifest.sha === fresh.sha && manifest.version === fresh.version && manifest.repo === fresh.repo &&
-        manifest.evidenceUrl === fresh.evidenceUrl, 'Stale packaging manifest');
+        manifest.evidenceUrl === fresh.evidenceUrl && manifest.mainSha === fresh.mainSha, 'Stale packaging manifest');
     for (const file of scripts) ensure(manifest.hashes[file] === fresh.hashes[file] &&
         hash(fs.readFileSync(path.join(root, 'release-artifacts', file))) === fresh.hashes[file], `Packaged file changed: ${file}`);
     for (const line of ['desktop', 'mobile']) {
@@ -161,7 +197,7 @@ function publish(options) {
     }
     const tags = ['desktop', 'mobile'].map(line => `${line}-v${options.version}`);
     const existing = tags.map(tag => maybeApi(`repos/${options.repo}/git/ref/tags/${tag}`));
-    ensure(api(`repos/${options.repo}/git/ref/heads/main`).object.sha === options.sha, 'Main changed immediately before tag creation');
+    ensure(api(`repos/${options.repo}/git/ref/heads/main`).object.sha === fresh.mainSha, 'Main changed immediately before tag creation');
     if (tagMode(existing, options.resume) === 'reuse') tags.forEach((tag, index) => validateTag(tag, existing[index], options, index === 0 ? 'Desktop' : 'Mobile'));
     else {
         command('git', ['config', 'user.name', 'github-actions[bot]']);
@@ -174,7 +210,7 @@ function publish(options) {
     for (const line of ['desktop', 'mobile']) {
         const tag = `${line}-v${options.version}`;
         const title = `${line === 'desktop' ? 'Desktop' : 'Mobile'} v${options.version}`;
-        let release = maybeApi(`repos/${options.repo}/releases/tags/${tag}`);
+        let release = findRelease(options.repo, tag);
         if (release) {
             validateReleaseDetail(release, { ...manifest, resume: options.resume }, line);
         } else {
@@ -182,10 +218,11 @@ function publish(options) {
             fs.writeFileSync(notes, releaseNotes(manifest, line === 'desktop' ? 'Desktop' : 'Mobile'));
             command('gh', ['release', 'create', tag, '--draft', '--verify-tag', '--target', options.sha,
                 '--repo', options.repo, '--title', title, '--notes-file', notes]);
-            release = api(`repos/${options.repo}/releases/tags/${tag}`);
+            release = findRelease(options.repo, tag);
+            ensure(release?.draft && release.target_commitish === options.sha, `Created draft is missing or conflicting: ${tag}`);
         }
         compareReleaseAssets(release, manifest, line, true);
-        const complete = api(`repos/${options.repo}/releases/tags/${tag}`);
+        const complete = api(`repos/${options.repo}/releases/${release.id}`);
         compareReleaseAssets(complete, manifest, line, false);
         releases.push(complete);
     }
@@ -201,15 +238,15 @@ function publish(options) {
     if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
         `## Release ${options.version}\n\nCommit: ${options.sha}\n\nAcceptance: ${options.evidenceUrl}\n\nBoth annotated tags and all four downloadable script hashes verified.\n`);
 }
-module.exports = { inputs, evidenceLocation, validateEvidence, clientChecks, scriptHashes, tagMode, validateTagDetail, validateReleaseDetail, releaseNotes, packageRelease, publish };
+module.exports = { inputs, evidenceLocation, validateEvidence, clientChecks, scriptHashes, tagMode, validateTagDetail, validateReleaseDetail, releaseNotes, packageRelease, publish, findRelease, validateTarget };
 if (require.main === module) {
     try {
         const options = inputs();
         if (process.argv[2] === 'package') packageRelease(preflight(options));
         else if (process.argv[2] === 'publish') publish(options);
         else if (process.argv[2] === 'validate') {
-            ensure(api(`repos/${options.repo}/git/ref/heads/main`).object.sha === options.sha, 'Target is not current main');
-            ensure(command('git', ['rev-parse', 'HEAD']) === options.sha, 'Dispatch commit differs from main target');
+            command('git', ['fetch', 'origin', 'main', '--tags']);
+            validateTarget(options);
         } else throw new Error('Use validate, package or publish');
     } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
