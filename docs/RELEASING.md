@@ -47,6 +47,11 @@ Inspect the generated runtime configuration as well as client logs and connectio
   while normal Baidu/JD pages work through DIRECT.
 - DNS and top-level IPv6 settings are false. Use a fresh uncached AAAA query
   through the client's configured DNS listener and confirm no IPv6 result.
+  Check the final running configuration, not only the JavaScript source: a client
+  can apply its base settings after preprocessing. During local Clash Verge
+  v2.5.6 acceptance, DNS IPv6 was false and an AAAA query returned zero answers,
+  but the base and final top-level IPv6 were still true. Disable the client's
+  IPv6 setting, reload, and recheck before marking this item passed.
 - With debug logs temporarily enabled, visit HTTP and TLS sites in configured
   ports and inspect sniffed domains. Confirm platform skip domains are preserved.
   QUIC remains affected by existing blocking rules; sniffing does not decrypt ECH.

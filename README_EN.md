@@ -26,7 +26,7 @@
 ## 🚀 Usage
 
 > [!IMPORTANT]
-> ⚠️ This script is intended to **override an airport-provided subscription config**; it is not recommended for overriding a hand-written config. The script runs `main(config)` after the subscription loads, enhancing DNS / routing / proxy groups in place. Custom rules survive subscription updates because they are injected at runtime, not written into the subscription YAML.
+> ⚠️ This script is intended to **override an airport-provided subscription config**; it is not recommended for overriding a hand-written config. The script runs `main(config)` after the subscription loads and returns the enhanced DNS / routing / proxy-group configuration. Custom rules survive subscription updates because they are injected at runtime, not written into the subscription YAML.
 
 ### 1. Pick a script
 
